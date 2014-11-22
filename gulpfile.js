@@ -10,6 +10,7 @@ var uglify = require('gulp-uglify');
 var livereload = process.env.NODE_ENV != 'production' ? require('gulp-livereload') : null;
 var nodemon = process.env.NODE_ENV != 'production' ? require('gulp-nodemon') : null;
 
+// compiled files are created in build/
 
 gulp.task('less', function() {
   gulp.src('./less/app.less')
