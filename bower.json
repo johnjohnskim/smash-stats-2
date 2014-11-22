@@ -1,0 +1,23 @@
+{
+  "name": "smash-stats-2",
+  "version": "2.0",
+  "homepage": "https://github.com/johnjohnskim/smash-stats-2",
+  "authors": [
+    "John Kim <johnjohnskim@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.1",
+    "d3": "~3.4.13",
+    "lodash": "~2.4.1",
+    "react": "~0.12.1"
+  }
+}
