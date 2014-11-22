@@ -33,7 +33,6 @@ gulp.task('reactify', function() {
     }))
     .pipe(uglify())
     .pipe(rename(function(path) {
-      path.basename += '-bundle';
       path.extname = '.js';
     }))
     .pipe(gulp.dest('./build/js'))
@@ -47,7 +46,7 @@ gulp.task('server', function() {
     env: {'NODE_ENV': 'development'}
   }).on('restart', function() {
     console.log('restarting...');
-  })
+  });
 });
 
 gulp.task('watch', function() {

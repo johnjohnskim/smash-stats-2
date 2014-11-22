@@ -4,7 +4,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 // var api = require('./routes/api');
-// var index = require('./routes/index');
+var index = require('./routes/index');
 
 var app = express();
 
@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, 'bower_components')));
 
 // routes
 // app.use('/api', api);
-// app.use('/', index);
+app.use('/', index);
 
 // 404
 app.use(function(req, res, next) {
