@@ -32,6 +32,7 @@ CREATE VIEW fights AS
     p.name AS winnername,
     x.winnerchar,
     c.name AS winnercharname,
+    x.rating,
     x.notes
    FROM ( SELECT DISTINCT
             f.id,

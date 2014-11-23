@@ -6,13 +6,15 @@ var router = express.Router();
 
 router.use(function(req, res, next) {
   console.log('api request made');
+  // special global var used by sql.js
+  API_RESPONSE = res;
   next();
 });
 
 // PLAYERS
 router.route('/players')
   .get(function(req, res) {
-    sql.getRows("SELECT * FROM players", null, res, function(err, rows) {
+    sql.getRows("SELECT * FROM players", null, function(err, rows) {
       res.json(rows);
     });
   })
@@ -21,24 +23,15 @@ router.route('/players')
     if (!name) {
       return res.end('Need a name');
     }
-    sql.insert("INSERT INTO u_players (name) VALUES ($1)", [req.body.name], res, function(err, id) {
+    sql.insert("INSERT INTO u_players (name) VALUES ($1)", [req.body.name], function(err, id) {
       res.json(id);
     });
   })
 
 router.route('/players/:pid')
   .get(function(req, res) {
-    sql.getRow("SELECT * FROM players WHERE id=$1", [req.params.pid], res, function(err, row) {
+    sql.getRow("SELECT * FROM players WHERE id=$1", [req.params.pid], function(err, row) {
       res.json(row);
-    });
-  })
-  .put(function(req, res) {
-    var name = req.body.name;
-    if (!name) {
-      return res.end('Need a name');
-    }
-    sql.query("UPDATE u_players SET name=$1 WHERE id=$2", [req.body.name, req.params.pid], res, function(err) {
-      res.end('ok');
     });
   })
 
@@ -46,11 +39,11 @@ router.route('/players/:pid')
 var fightFields = {
   p1: 'player1', p2: 'player2', p3: 'player3', p4: 'player4',
   c1: 'character1', c2: 'character2', c3: 'character3', c4: 'character4',
-  stage: 'stage', winner: 'winner', notes: 'notes'
+  stage: 'stage', winner: 'winner', rating: 'rating', notes: 'notes'
 };
 router.route('/fights')
   .get(function(req, res) {
-    sql.getRows("SELECT id, to_char(date, 'YYYY-MM-DD') as date, stagename, winnername, p1name, c1name, p2name, c2name, p3name, c3name, p4name, c4name FROM fights", null, res, function(err, rows) {
+    sql.getRows("SELECT * FROM fights", null, function(err, rows) {
       res.json(rows);
     });
   })
@@ -62,14 +55,14 @@ router.route('/fights')
     var fieldStr = '(' + fields.map(function(f) { return fightFields[f]; }).join(',') + ')';
     var args = fields.map(function(a) { return req.body[a]; });
     var argStr = '(' + fields.map(function(a, i) { return '$' + (i+1); }).join(',') + ')';
-    sql.insert("INSERT INTO u_fights " + fieldStr + " VALUES " + argStr, args, res, function(err, id) {
-        res.json(id);
+    sql.insert("INSERT INTO u_fights " + fieldStr + " VALUES " + argStr, args, function(err, id) {
+      res.json(id);
     });
   })
 
 router.route('/fights/:fid')
   .get(function(req, res) {
-    sql.getRow("SELECT * FROM fights WHERE id=$1", [req.params.fid], res, function(err, row) {
+    sql.getRow("SELECT * FROM fights WHERE id=$1", [req.params.fid], function(err, row) {
       res.json(row);
     });
   })
@@ -85,12 +78,12 @@ router.route('/fights/:fid')
     if (!field) {
       res.end('invalid field');
     }
-    sql.query("UPDATE u_fights SET "+field+"=$1 WHERE id=$2", [value, req.params.fid], res, function(err) {
+    sql.query("UPDATE u_fights SET "+field+"=$1 WHERE id=$2", [value, req.params.fid], function(err) {
       res.end('ok');
     });
   })
 
-// REST
+// Other selectable views
 var views = ['stages', 'stagemeta', 'stagewins',
   'characters', 'characterwins', 'charactermeta', 'charactervs',
   'playermeta', 'playervs', 'playertimeline', 'charactertimeline'];
@@ -99,8 +92,23 @@ views.forEach(function(v) {
   router.route('/' + v)
     .get(function(req, res) {
       extra = v == 'playertimeline' ? " ORDER BY player, date" : '';
-      sql.getRows("SELECT * FROM " + v + extra, null, res, function(err, rows) {
+      sql.getRows("SELECT * FROM " + v + extra, null, function(err, rows) {
         res.json(rows);
+      });
+    })
+});
+
+// Updateable views for ELO/rating
+var ratingViews = ['players', 'stages', 'characters'];
+ratingViews.forEach(function(v) {
+  router.route('/' + v + '/:id')
+    .put(function(req, res) {
+      var rating = req.body.rating;
+      if (!rating) {
+        return res.end('Need a rating');
+      }
+      sql.query("UPDATE u_"+v+" SET rating=$1 WHERE id=$2", [rating, req.params.id], function(err) {
+        res.end('ok');
       });
     })
 });

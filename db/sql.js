@@ -3,7 +3,7 @@ var conn = require('./auth');
 
 var sql = {};
 
-function makeQuery(query, args, response, callback) {
+function makeQuery(query, args, callback) {
   if (!args || !args.length) { args = null; }
   pg.connect(conn, function(err, client, done) {
     if (err) {
@@ -14,9 +14,7 @@ function makeQuery(query, args, response, callback) {
       // if error, override callback and end response
       if (err) {
         console.error('error running query', err);
-        // TODO: Find way to avoid passing in response on every call
-        //    need to end the response to avoid indefinite hang
-        response.end(err.message);
+        API_RESPONSE.end(err.message);
       } else {
         callback(err, result);
       }
@@ -25,24 +23,24 @@ function makeQuery(query, args, response, callback) {
 }
 sql.query = makeQuery;
 
-sql.getRows = function(query, args, response, callback) {
-  makeQuery(query, args, response, function(err, result) {
+sql.getRows = function(query, args, callback) {
+  makeQuery(query, args, function(err, result) {
     callback(err, result.rows);
   });
 };
 
-sql.getRow = function(query, args, response, callback) {
-  makeQuery(query, args, response, function(err, result) {
+sql.getRow = function(query, args, callback) {
+  makeQuery(query, args, function(err, result) {
     callback(err, result.rows[0]);
   });
 };
 
 
-sql.insert = function(query, args, response, callback) {
+sql.insert = function(query, args, callback) {
   if (!query.match(/RETURNING/i)) {
     query += ' RETURNING id';
   }
-  makeQuery(query, args, response, function(err, result) {
+  makeQuery(query, args, function(err, result) {
     callback(err, result.rows[0]);
   });
 };

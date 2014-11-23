@@ -3,7 +3,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-// var api = require('./routes/api');
+var api = require('./routes/api');
 var index = require('./routes/index');
 
 var app = express();
@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 
 // routes
-// app.use('/api', api);
+app.use('/api', api);
 app.use('/', index);
 
 // 404
