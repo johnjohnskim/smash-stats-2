@@ -14,18 +14,10 @@ CREATE VIEW fights AS
     x.p1name,
     x.player2,
     x.p2name,
-    x.player3,
-    x.p3name,
-    x.player4,
-    x.p4name,
     x.character1,
     x.c1name,
     x.character2,
     x.c2name,
-    x.character3,
-    x.c3name,
-    x.character4,
-    x.c4name,
     x.stage,
     x.stagename,
     x.winner,
@@ -41,18 +33,10 @@ CREATE VIEW fights AS
             p1.name AS p1name,
             f.player2,
             p2.name AS p2name,
-            f.player3,
-            p3.name AS p3name,
-            f.player4,
-            p4.name AS p4name,
             f.character1,
             c1.name AS c1name,
             f.character2,
             c2.name AS c2name,
-            f.character3,
-            c3.name AS c3name,
-            f.character4,
-            c4.name AS c4name,
             f.stage,
             s.name AS stagename,
             f.winner,
@@ -61,19 +45,13 @@ CREATE VIEW fights AS
             CASE
               WHEN f.winner = f.player1 THEN f.character1
               WHEN f.winner = f.player2 THEN f.character2
-              WHEN f.winner = f.player3 THEN f.character3
-              WHEN f.winner = f.player4 THEN f.character4
               ELSE NULL
             END AS winnerchar
           FROM u_fights f
             LEFT JOIN players p1 ON p1.id = f.player1
             LEFT JOIN players p2 ON p2.id = f.player2
-            LEFT JOIN players p3 ON p3.id = f.player3
-            LEFT JOIN players p4 ON p4.id = f.player4
             LEFT JOIN characters c1 ON c1.id = f.character1
             LEFT JOIN characters c2 ON c2.id = f.character2
-            LEFT JOIN characters c3 ON c3.id = f.character3
-            LEFT JOIN characters c4 ON c4.id = f.character4
             INNER JOIN stages s ON s.id = f.stage) x
      INNER JOIN players p ON p.id = x.winner
      INNER JOIN characters c ON c.id = x.winnerchar;

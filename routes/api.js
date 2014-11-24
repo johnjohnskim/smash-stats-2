@@ -37,8 +37,7 @@ router.route('/players/:pid')
 
 // FIGHTS
 var fightFields = {
-  p1: 'player1', p2: 'player2', p3: 'player3', p4: 'player4',
-  c1: 'character1', c2: 'character2', c3: 'character3', c4: 'character4',
+  p1: 'player1', p2: 'player2', c1: 'character1', c2: 'character2',
   stage: 'stage', winner: 'winner', rating: 'rating', notes: 'notes'
 };
 router.route('/fights')
