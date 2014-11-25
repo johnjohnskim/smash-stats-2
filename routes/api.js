@@ -1,8 +1,7 @@
 var express = require('express');
-var bodyParser = require('body-parser');
 
-var sql = require('../db/sql');
 var router = express.Router();
+var sql = require('../db/sql');
 
 router.use(function(req, res, next) {
   console.log('api request made');

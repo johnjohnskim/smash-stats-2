@@ -1,10 +1,12 @@
 var express = require('express');
+var session = require('express-session');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var api = require('./routes/api');
 var index = require('./routes/index');
+var api = require('./routes/api');
+var login = require('./routes/login');
 
 var app = express();
 
@@ -16,15 +18,36 @@ app.set('view engine', 'jade');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(session({
+  secret: 'melee is still king',
+  resave: false,
+  saveUninitialized: false
+}));
 
-// static files
+// link up files
+// static
 app.use(express.static(path.join(__dirname, 'public')));
+// compiled
 app.use(express.static(path.join(__dirname, 'build')));
+// libraries
 app.use(express.static(path.join(__dirname, 'bower_components')));
 
+// authorize requests
+app.use(function(req, res, next) {
+  if (app.get('env') !== 'development' && !req.session.username) {
+    if (req.cookies.username) {
+      req.session.username = req.cookies.username;
+    } else if (req.url != '/login') {
+      res.redirect('/login');
+    }
+  }
+  next();
+});
+
 // routes
-app.use('/api', api);
 app.use('/', index);
+app.use('/api', api);
+app.use('/', login);
 
 // 404
 app.use(function(req, res, next) {

@@ -1,5 +1,5 @@
 var pg = require('pg');
-var conn = require('./auth');
+var conn = require('./auth').db;
 
 var sql = {};
 
