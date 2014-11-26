@@ -11,13 +11,13 @@ CREATE VIEW fights AS
   SELECT x.id,
     x.date,
     x.player1,
-    x.p1name,
+    x.player1name,
     x.player2,
-    x.p2name,
+    x.player2name,
     x.character1,
-    x.c1name,
+    x.character1name,
     x.character2,
-    x.c2name,
+    x.character2name,
     x.stage,
     x.stagename,
     x.winner,
@@ -26,17 +26,17 @@ CREATE VIEW fights AS
     c.name AS winnercharname,
     x.rating,
     x.notes
-   FROM ( SELECT DISTINCT
+  FROM ( SELECT DISTINCT
             f.id,
             f.date,
             f.player1,
-            p1.name AS p1name,
+            p1.name AS player1name,
             f.player2,
-            p2.name AS p2name,
+            p2.name AS player2name,
             f.character1,
-            c1.name AS c1name,
+            c1.name AS character1name,
             f.character2,
-            c2.name AS c2name,
+            c2.name AS character2name,
             f.stage,
             s.name AS stagename,
             f.winner,
@@ -53,5 +53,8 @@ CREATE VIEW fights AS
             LEFT JOIN characters c1 ON c1.id = f.character1
             LEFT JOIN characters c2 ON c2.id = f.character2
             INNER JOIN stages s ON s.id = f.stage) x
-     INNER JOIN players p ON p.id = x.winner
-     INNER JOIN characters c ON c.id = x.winnerchar;
+    INNER JOIN players p ON p.id = x.winner
+    INNER JOIN characters c ON c.id = x.winnerchar;
+
+CREATE VIEW events AS
+SELECT * FROM u_events;

@@ -6,7 +6,7 @@ FROM (
     (SELECT count(*) FROM findpfights(p.id) WHERE date<=f.date) total
     FROM fights f
     LEFT JOIN players p ON true
-) r;
+) r WHERE total>0;
 
 CREATE VIEW CharacterTimeline AS
 SELECT date, character, wins, total, CASE WHEN total=0 THEN null ELSE cast(wins AS float)/total END winpct
@@ -16,4 +16,13 @@ FROM (
     (SELECT count(*) FROM findcfights(c.id) WHERE date<=f.date) total
     FROM fights f
     LEFT JOIN characters c ON true
-) r;
+) r WHERE total>0;
+
+CREATE VIEW RatingTimeline AS
+SELECT date, player, rating
+FROM (
+    SELECT DISTINCT date, p.id, name player,
+    (SELECT sum(rating * CASE WHEN winner=p.id THEN 1 ELSE -1 END) FROM findpfights(p.id) WHERE date<=f.date) rating
+    FROM fights f
+    LEFT JOIN players p ON true
+) r WHERE rating!=0;

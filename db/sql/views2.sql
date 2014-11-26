@@ -1,5 +1,6 @@
 CREATE VIEW stagemeta AS
- SELECT s.name,
+ SELECT s.id,
+    s.name,
     ( SELECT count(*) AS count
            FROM fights
           WHERE fights.stage = s.id) AS total
@@ -48,20 +49,20 @@ CREATE VIEW playermeta AS
            FROM players p) x;
 
 CREATE VIEW playervs AS
- SELECT x.pid1,
-    x.pname1,
-    x.pid2,
-    x.pname2,
+ SELECT x.player1,
+    x.player1name,
+    x.player2,
+    x.player2name,
     x.total,
     x.wins,
         CASE
             WHEN x.total = 0 THEN NULL
             ELSE cast(x.wins AS float) / cast(x.total AS float)
         END AS winpct
-   FROM ( SELECT p.id AS pid1,
-            p.name AS pname1,
-            q.id AS pid2,
-            q.name AS pname2,
+   FROM ( SELECT p.id AS player1,
+            p.name AS player1name,
+            q.id AS player2,
+            q.name AS player2name,
             ( SELECT count(*) AS count
                    FROM findpfights(p.id, q.id) ) AS total,
             ( SELECT count(*) AS count
@@ -112,20 +113,20 @@ CREATE VIEW charactermeta AS
            FROM characters c) x;
 
 CREATE VIEW charactervs AS
- SELECT x.cid1,
-    x.cname1,
-    x.cid2,
-    x.cname2,
+ SELECT x.character1,
+    x.character1name,
+    x.character2,
+    x.character2name,
     x.total,
     x.wins,
         CASE
             WHEN x.total = 0 THEN NULL
             ELSE cast(x.wins AS float) / cast(x.total AS float)
         END AS winpct
-   FROM ( SELECT c.id AS cid1,
-            c.name AS cname1,
-            d.id AS cid2,
-            d.name AS cname2,
+   FROM ( SELECT c.id AS character1,
+            c.name AS character1name,
+            d.id AS character2,
+            d.name AS character2name,
             ( SELECT count(*) AS count
                    FROM findcfights(c.id, d.id) ) AS total,
             ( SELECT count(*) AS count

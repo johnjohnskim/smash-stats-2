@@ -11,8 +11,8 @@ CREATE FUNCTION findpfights(varchar DEFAULT NULL, varchar DEFAULT NULL)
   RETURNS SETOF fights AS
 $$
 SELECT * FROM fights WHERE
-($1 IS NULL OR $1 IN (lower(p1name), lower(p2name))) AND
-($2 IS NULL OR $2 IN (lower(p1name), lower(p2name)))
+($1 IS NULL OR $1 IN (lower(player1name), lower(player2name))) AND
+($2 IS NULL OR $2 IN (lower(player1name), lower(player2name)))
 $$
   LANGUAGE sql;
 
@@ -31,8 +31,8 @@ CREATE FUNCTION findcfights(varchar DEFAULT NULL, varchar DEFAULT NULL)
   RETURNS SETOF fights AS
 $$
 SELECT * FROM fights WHERE
-($1 IS NULL OR $1 IN (lower(c1name), lower(c2name))) AND
-($2 IS NULL OR $2 IN (lower(c1name), lower(c2name)))
+($1 IS NULL OR $1 IN (lower(character1name), lower(character2name))) AND
+($2 IS NULL OR $2 IN (lower(character1name), lower(character2name)))
 $$
   LANGUAGE sql;
 
@@ -51,8 +51,8 @@ CREATE FUNCTION findcfights(varchar DEFAULT NULL, varchar DEFAULT NULL)
   RETURNS SETOF fights AS
 $$
 SELECT * FROM fights WHERE
-($1 IS NULL OR $1 IN (lower(c1name), lower(c2name))) AND
-($2 IS NULL OR $2 IN (lower(c1name), lower(c2name))) AND
+($1 IS NULL OR $1 IN (lower(character1name), lower(character2name))) AND
+($2 IS NULL OR $2 IN (lower(character1name), lower(character2name))) AND
 (($1=$2 AND character1=character2) OR ($1!=$2 AND character1!=character2))
 $$
   LANGUAGE sql;

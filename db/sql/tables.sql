@@ -35,3 +35,9 @@ CREATE TABLE u_fights
   rating int,
   notes varchar(255)
 );
+
+CREATE TABLE u_events
+(
+  what varchar(255) NOT NULL PRIMARY KEY,
+  date date NOT NULL
+);
