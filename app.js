@@ -8,6 +8,7 @@ var index = require('./routes/index');
 var api = require('./routes/api');
 var login = require('./routes/login');
 var tables = require('./routes/tables');
+var graphs = require('./routes/graphs');
 
 var app = express();
 
@@ -52,6 +53,7 @@ app.use('/', index);
 app.use('/api', api);
 app.use('/', login);
 app.use('/tables', tables);
+app.use('/graphs', graphs);
 
 // 404
 app.use(function(req, res, next) {
