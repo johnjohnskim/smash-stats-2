@@ -12,41 +12,41 @@ var Table = React.createClass({
   getInitialState: function() {
     return {
       data: [],
-      sortBy: 0,
-      order: '+',
-      filter: ''
+      // search text
+      filter: '',
+      // column position to order by
+      sortBy: null,
+      // asc (+) vs desc (-) order
+      order: '+'
     };
   },
   componentDidMount: function() {
     $.getJSON(this.props.url, {}, function(data) {
       if (!data || !data.length) return;
-      data = _.sortBy(data, 'winpct').reverse();
-      data.forEach(function(d) {
-        d.winpct = Math.round(d.winpct * 100) + '%';
-      });
-      data = data.map(function(d) {
-        return this.props.headers.map(function(h) {
-          return d[h[0]];
+      // Make sure percentages are properly formatted
+      if (_.has(data[0], 'winpct')) {
+        data.forEach(function(d) {
+          d.winpct = Math.round(d.winpct * 100) + '%';
         });
-      }.bind(this));
+      }
       this.setState({
         data: data
       });
     }.bind(this));
   },
-  handleKeypress: _.throttle(function() {
+  handleKeyPress: _.throttle(function() {
     this.setState({
       filter: this.refs.search.getDOMNode().value
     });
   }, 100),
-  sort: function(index) {
-    if (this.state.sortBy == index) {
+  sort: function(attr) {
+    if (this.state.sortBy == attr) {
       this.setState({
         order: this.state.order == '+' ? '-' : '+'
       });
     } else {
       this.setState({
-        sortBy: index,
+        sortBy: attr,
         order: '+'
       });
     }
@@ -60,14 +60,14 @@ var Table = React.createClass({
     // filter data
     if (this.state.filter) {
       data = data.filter(function(d) {
-        return d.some(function(x) {
-          return isNum(x) ? false : x.toLowerCase().indexOf(filter) > -1;
+        return _.values(d).some(function(v) {
+          return isNum(v) ? false : v.toLowerCase().indexOf(filter) > -1;
         });
       });
     }
 
     // sort data
-    if (this.state.sortBy > -1 && data.length) {
+    if (this.state.sortBy && data.length) {
       first = data[0][this.state.sortBy];
       if (isNum(first)) {
         data = _.sortBy(data, function(d) {
@@ -86,20 +86,20 @@ var Table = React.createClass({
     var trs = data.map(function(d, i) {
       return (
         <tr key={i}>
-          { d.map(function(x, i) {return (<td key={i}>{x}</td>);}) }
+          { this.props.headers.map(function(h, i) {return (<td key={i}>{d[h[0]]}</td>);}) }
         </tr>
       );
     }.bind(this));
 
     function makeHeader(h, i) {
-      return (<Header key={i} name={h[1]} sort={this.sort} sortBy={this.state.sortBy} order={this.state.order} />);
+      return (<Header key={i} name={h[1]} attr={h[0]} sort={this.sort} sortBy={this.state.sortBy} order={this.state.order} />);
     }
 
     return (
       <div>
         <div className="clearfix">
           <div className="pull-right">
-            <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+            <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeyPress} />
           </div>
         </div>
         <table className="table table-hover main-table">
@@ -119,10 +119,10 @@ var Table = React.createClass({
 
 var Header = React.createClass({
   handleClick: function() {
-    this.props.sort(this.props.key);
+    this.props.sort(this.props.attr);
   },
   render: function() {
-    var classes = this.props.sortBy == this.props.key ? (this.props.order == '+' ? 'glyphicon-chevron-up' :
+    var classes = this.props.sortBy == this.props.attr ? (this.props.order == '+' ? 'glyphicon-chevron-up' :
                                                                                    'glyphicon-chevron-down') :
                   '';
     return (
@@ -208,13 +208,13 @@ var tableMeta = {
 }
 
 // table-type is given from the table router
-var tableType = $('#app')[0].getAttribute('type');
+var App = document.getElementById('app');
+var tableType = App.getAttribute('type');
 if (tableType && tableMeta[tableType]) {
   if (tableType == 'fights') {
     $.getJSON('/api/fights', function(d) {
-      var h1 = $('h1');
-      h1.text('All ' + d.length + ' fights');
+      $('h1').text('All ' + d.length + ' fights');
     });
   }
-  React.render(<Table url={'/api/'+tableType} headers={tableMeta[tableType].headers} />, document.getElementById('app'));
+  React.render(<Table url={'/api/'+tableType} headers={tableMeta[tableType].headers} />, App);
 }
