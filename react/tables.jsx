@@ -34,7 +34,7 @@ var Table = React.createClass({
       });
     }.bind(this));
   },
-  handleKeyPress: _.throttle(function() {
+  handleKeypress: _.throttle(function() {
     this.setState({
       filter: this.refs.search.getDOMNode().value
     });
@@ -99,7 +99,7 @@ var Table = React.createClass({
       <div>
         <div className="clearfix">
           <div className="pull-right">
-            <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeyPress} />
+            <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
           </div>
         </div>
         <table className="table table-hover main-table">

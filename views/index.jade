@@ -3,5 +3,12 @@ extends layout
 block content
   div.container
     h1= title
+    //- div
+    //-   a(href='/fights') Add a fight
+    each p in tablePages
+      div
+        a(href='/tables/'+p[0])= p[1]
+    //- div
+    //-   a(href='/graphs') Player Timeline
     div#app
   script(src='/js/index.js')
