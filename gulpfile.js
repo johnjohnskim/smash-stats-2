@@ -16,6 +16,9 @@ gulp.task('less', function() {
   gulp.src('./less/app.less')
     .pipe(less())
     .pipe(minifyCss())
+    .pipe(rename(function(path) {
+      path.extname = '.min.css';
+    }))
     .pipe(gulp.dest('./build/css'))
 });
 

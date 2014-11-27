@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var api = require('./routes/api');
 var login = require('./routes/login');
+var tables = require('./routes/tables');
 
 var app = express();
 
@@ -31,6 +32,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'build')));
 // libraries
 app.use(express.static(path.join(__dirname, 'bower_components')));
+// react testing
+app.use(express.static(path.join(__dirname, 'react')));
 
 // authorize requests
 app.use(function(req, res, next) {
@@ -48,6 +51,7 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/api', api);
 app.use('/', login);
+app.use('/tables', tables);
 
 // 404
 app.use(function(req, res, next) {
