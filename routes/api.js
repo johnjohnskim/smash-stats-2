@@ -30,15 +30,18 @@ router.route('/players')
 router.route('/players/:pid')
   .get(function(req, res) {
     sql.getRow("SELECT * FROM players WHERE id=$1", [req.params.pid], function(err, row) {
+      if (!row) {
+        return res.end('');
+      }
       res.json(row);
     });
   })
 
 // FIGHTS
-var fightFields = {
-  p1: 'player1', p2: 'player2', c1: 'character1', c2: 'character2',
-  stage: 'stage', winner: 'winner', rating: 'rating', notes: 'notes'
-};
+var fightFields = [
+   'player1', 'player2', 'character1', 'character2',
+   'stage', 'winner', 'rating', 'notes'
+  ];
 router.route('/fights')
   .get(function(req, res) {
     sql.getRows("SELECT * FROM fights", null, function(err, rows) {
@@ -49,10 +52,9 @@ router.route('/fights')
     if (!req.body.stage || !req.body.winner) {
       return res.end('Need a ' + (!req.body.stage ? 'stage' : 'winner'));
     }
-    var fields = Object.keys(fightFields);
-    var fieldStr = '(' + fields.map(function(f) { return fightFields[f]; }).join(',') + ')';
-    var args = fields.map(function(a) { return req.body[a]; });
-    var argStr = '(' + fields.map(function(a, i) { return '$' + (i+1); }).join(',') + ')';
+    var fieldStr = '(' + fightFields.map(function(f) { return f; }).join(',') + ')';
+    var args = fightFields.map(function(a) { return req.body[a]; });
+    var argStr = '(' + fightFields.map(function(a, i) { return '$' + (i+1); }).join(',') + ')';
     sql.insert("INSERT INTO u_fights " + fieldStr + " VALUES " + argStr, args, function(err, id) {
       res.json(id);
     });
@@ -61,20 +63,23 @@ router.route('/fights')
 router.route('/fights/:fid')
   .get(function(req, res) {
     sql.getRow("SELECT * FROM fights WHERE id=$1", [req.params.fid], function(err, row) {
+      if (!row) {
+        return res.end('');
+      }
       res.json(row);
     });
   })
   .put(function(req, res) {
-    var fields = Object.keys(fightFields);
-    var field, value;
-    fields.forEach(function(f) {
+    var field;
+    var value;
+    fightFields.forEach(function(f) {
       if (req.body[f]) {
-        field = fightFields[f];
+        field = f;
         value = req.body[f];
       }
     });
     if (!field) {
-      res.end('invalid field');
+      return res.end('invalid field');
     }
     sql.query("UPDATE u_fights SET "+field+"=$1 WHERE id=$2", [value, req.params.fid], function(err) {
       res.end('ok');
@@ -82,9 +87,10 @@ router.route('/fights/:fid')
   })
 
 // Other selectable views
-var views = ['stages', 'stagemeta', 'stagewins',
-  'characters', 'characterwins', 'charactermeta', 'charactervs',
-  'playermeta', 'playervs', 'playertimeline', 'charactertimeline'];
+var views = ['events', 'stages', 'stagemeta', 'stagewins',
+  'characters', 'charactermeta', 'characterwins', 'charactervs',
+  'playermeta', 'playervs', 'playertimeline', 'charactertimeline',
+  'ratingtimeline'];
 
 views.forEach(function(v) {
   router.route('/' + v)
