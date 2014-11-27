@@ -3,12 +3,21 @@ extends layout
 block content
   div.container
     h1= title
-  form(action='/login', method='post')
-    div
-      label Username
-      input(type='text', name='username')
-    div
-      label Password
-      input(type='password', name='password')
-    div
-      input(type='submit', value='Log in')
+    form(action='/login', method='post')
+      div(class='input-group')
+        //- label Username
+        input(
+          type='text'
+          name='username'
+          class='form-control'
+          placeholder='Username'
+        )
+        //- label Password
+        input(
+          type='password'
+          name='password'
+          class='form-control'
+          placeholder='Password'
+        )
+      div
+        input(type='submit', value='Login', class='btn btn-default')
