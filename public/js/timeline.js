@@ -1,3 +1,5 @@
+var graphType = document.getElementById('graph').getAttribute('type');
+
 var margin = {top: 20, right: 80, bottom: 30, left: 50};
 var width = 960 - margin.left - margin.right;
 var height = 500 - margin.top - margin.bottom;
@@ -43,20 +45,22 @@ var yAxisLine = svg.append('g')
     .style('text-anchor', 'end')
     .text('Win %');
 
+// JK: can actually be characters, depending on graph type;
+//    currently avoiding a generic, more-apt name like items
 var players;
 var playerData;
 var stat;
 
-$.getJSON('/api/playertimeline', function(data) {
+$.getJSON('/api/'+graphType+'timeline', function(data) {
   data.forEach(function (d) {
     d.date = parseDate(d.date);
     d.winpct = +d.winpct;
     d.wins = +d.wins;
   });
-  playerData = _.groupBy(data, 'player');
+  playerData = _.groupBy(data, graphType);
   players = Object.keys(playerData);
   color.domain(players);
-  changeStatType('rating');
+  changeStatType(graphType == 'player' ? 'rating' : 'winpct');
   updateGraph();
 });
 

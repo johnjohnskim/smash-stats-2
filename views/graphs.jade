@@ -5,17 +5,21 @@ block content
     div.back-button.glyphicon.glyphicon-arrow-left
   div.container
     h1= title
+    if type == 'player'
+      div.radio
+        label
+          input(type="radio", name="graphType", onclick="changeStatType(this.value)", value="rating", checked="checked")
+          span Rating
     div.radio
       label
-        input(type="radio", name="graphType", onclick="changeStatType(this.value)", value="rating", checked="checked")
-        span Total Wins
-    div.radio
-      label
-        input(type="radio", name="graphType", onclick="changeStatType(this.value)", value="winpct")
+        if type == 'player'
+          input(type="radio", name="graphType", onclick="changeStatType(this.value)", value="winpct")
+        else
+          input(type="radio", name="graphType", onclick="changeStatType(this.value)", value="winpct", checked="checked")
         span Win %
     div.radio
       label
         input(type="radio", name="graphType", onclick="changeStatType(this.value)", value="wins")
         span Total Wins
-    div#graph
+    div(id='graph', type=type)
   script(src='/js/timeline.js')

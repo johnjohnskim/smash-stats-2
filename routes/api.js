@@ -103,8 +103,10 @@ var views = ['events', 'stages', 'stagemeta', 'stagewins',
 views.forEach(function(v) {
   router.route('/' + v)
     .get(function(req, res) {
-      extra = v == 'playertimeline' ? " ORDER BY player, date" : '';
-      sql.getRows("SELECT * FROM " + v + extra, null, function(err, rows) {
+      orderBy = v == 'playertimeline' ? " ORDER BY player, date" :
+                     'charactertimeline' ? " ORDER BY character,date" :
+                     '';
+      sql.getRows("SELECT * FROM " + v + orderBy, null, function(err, rows) {
         res.json(rows);
       });
     })
