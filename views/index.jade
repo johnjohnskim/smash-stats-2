@@ -1,14 +1,19 @@
 extends layout
 
 block content
-  div.container
-    h1= title
-    //- div
-    //-   a(href='/fights') Add a fight
-    each p in tablePages
-      div
-        a(href='/tables/'+p[0])= p[1]
-    div
-      a(href='/graphs') Player Timeline
-    div#app
+  .container.index
+    .logo
+      img(src='/img/logo.png')
+    .fightBtn
+      a(href='/fights')
+        .addFight Add A Fight
+    ul.menu
+      each p in tablePages
+        li
+          a(href='/tables/'+p[0])
+            .menuItem #{p[1]}
+      li
+        a(href='/graphs')
+          .menuItem Player Timeline
+    #app
   script(src='/js/index.js')
