@@ -104,8 +104,8 @@ views.forEach(function(v) {
   router.route('/' + v)
     .get(function(req, res) {
       orderBy = v == 'playertimeline' ? " ORDER BY player, date" :
-                     'charactertimeline' ? " ORDER BY character,date" :
-                     '';
+                v == 'charactertimeline' ? " ORDER BY character,date" :
+                '';
       sql.getRows("SELECT * FROM " + v + orderBy, null, function(err, rows) {
         res.json(rows);
       });
