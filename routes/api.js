@@ -5,6 +5,14 @@ var sql = require('../db/sql');
 
 router.use(function(req, res, next) {
   console.log('api request made');
+  // authorize requests
+  if (process.env.NODE_ENV !== 'development') {
+    if (!req.session.username) {
+      return res.end('access restricted');
+    } else if (req.session.username !== 'quovo' && req.method !== 'GET') {
+      return res.end('access restricted');
+    }
+  }
   // special global var used by sql.js
   API_RESPONSE = res;
   next();
