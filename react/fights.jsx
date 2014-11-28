@@ -53,7 +53,7 @@ var App = React.createClass({
       enterType: 'basic',
       errorMsg: '',
       isFightAdded: false,
-      currentPlayers: [],
+      playerQueue: [],
       characterFilter: '',
       stageFilter: ''
     };
@@ -65,25 +65,44 @@ var App = React.createClass({
   //     players: newPlayers
   //   });
   // },
+  // addPlayer: function(p) {
+  //   if (this.state.players.length < 2 && this.state.players.indexOf(p) == -1) {
+  //     this.setState({
+  //       players: this.state.players.concat([p])
+  //     });
+  //   }
+  // },
+  // removePlayer: function() {
+  //   if (this.state.players.length) {
+  //     if (this.state.winner == this.state.players[this.state.players.length - 1]) {
+  //       this.setState({
+  //         winner: 0
+  //       });
+  //     }
+  //     this.setState({
+  //       players: this.state.players.slice(0, this.state.players.length - 1)
+  //     });
+  //   }
+  // },
   addPlayer: function(p) {
-    if (this.state.players.length < 2 && this.state.players.indexOf(p) == -1) {
+    if (this.state.playerQueue.indexOf(p) == -1) {
       this.setState({
-        players: this.state.players.concat([p])
+        playerQueue: this.state.playerQueue.concat([p])
       });
     }
   },
-  removePlayer: function() {
-    if (this.state.players.length) {
-      if (this.state.winner == this.state.players[this.state.players.length - 1]) {
-        this.setState({
-          winner: 0
-        });
-      }
-      this.setState({
-        players: this.state.players.slice(0, this.state.players.length - 1)
-      });
-    }
-  },
+  // removePlayer: function() {
+  //   if (this.state.players.length) {
+  //     if (this.state.winner == this.state.players[this.state.players.length - 1]) {
+  //       this.setState({
+  //         winner: 0
+  //       });
+  //     }
+  //     this.setState({
+  //       players: this.state.players.slice(0, this.state.players.length - 1)
+  //     });
+  //   }
+  // },
   addCharacter: function(c) {
     if (this.state.characters.length < 2) {
       this.setState({
@@ -164,24 +183,16 @@ var App = React.createClass({
     }.bind(this));
   },
   render: function() {
-    // return (
-    //   <div className="app text-center">
-    //     <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
-    //     <Buttons reset={this.resetCharacters} back={this.removeCharacter} />
-    //     <hr />
     //     <AddPlayer addPlayer={this.addNewPlayer} />
     //     <Players data={this.state.playerData} addPlayer={this.addPlayer} />
     //     <Buttons reset={this.resetPlayers} back={this.removePlayer} />
-    //     <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players}
-    //                characterData={this.state.characterData} selectedChars={this.state.characters}
-    //                winner={this.state.winner} selectWinner={this.selectWinner} />
-    //     <hr />
-    //     <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} />
     //     <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
     //   </div>
     // );
     return (
       <div className="app text-center">
+        <Players data={this.state.playerData} queue={this.state.playerQueue} addPlayer={this.addPlayer} />
+        <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} />
         <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
         <BackButton back={this.removeCharacter} />
         <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players}
@@ -191,7 +202,39 @@ var App = React.createClass({
       </div>
     );
   }
-})
+});
+
+var Player = React.createClass({
+  handleClick: function() {
+    this.props.addPlayer(this.props.data.id);
+  },
+  render: function() {
+    return (
+      <button className="player btn btn-default" onClick={this.handleClick} disabled={this.props.selected}>{this.props.data.name}</button>
+    );
+  }
+});
+
+var Players = React.createClass({
+  render: function() {
+    return (
+      <div>{ this.props.data.map(function(p) {return (<Player key={p.id} selected={this.props.queue.indexOf(p.id) > -1} data={p} addPlayer={this.props.addPlayer} />);}.bind(this)) }</div>
+    );
+  }
+});
+
+var PlayerQueue = React.createClass({
+  render: function() {
+    var players = this.props.queue.map(function(p) {
+      return _.find(this.props.data, {id: p});
+    }.bind(this));
+    return (
+      <ul>
+        {players.map(function(p) {return (<li>{p.name}</li>);})}
+      </ul>
+    );
+  }
+});
 
 var Character = React.createClass({
   handleClick: function() {
@@ -265,25 +308,6 @@ var Characters = React.createClass({
     );
   }
 });
-
-// var Player = React.createClass({
-//   handleClick: function() {
-//     this.props.addPlayer(this.props.data.id);
-//   },
-//   render: function() {
-//     return (
-//       <button className="player btn" onClick={this.handleClick}>{this.props.data.name}</button>
-//     );
-//   }
-// });
-
-// var Players = React.createClass({
-//   render: function() {
-//     return (
-//       <div>{ this.props.data.map(function(p) {return (<Player key={p.id} data={p} addPlayer={this.props.addPlayer} />);}.bind(this)) }</div>
-//     );
-//   }
-// })
 
 var CharacterSummary = React.createClass({
   render: function() {
