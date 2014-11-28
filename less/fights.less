@@ -1,0 +1,32 @@
+.box {
+  display: inline;
+  position: relative;
+}
+.character, .stage {
+  opacity: 0.75;
+  &:hover {
+    opacity: 1;
+  }
+}
+.character {
+  &.selected {
+    outline: 5px solid;
+    opacity: 0.9;
+    z-index: 2;
+  }
+  &.selected-p1 {
+    outline-color: red;
+  }
+  &.selected-p2 {
+    outline-color: blue;
+  }
+  &.selected-both {
+    outline-color: purple;
+  }
+}
+
+.stage.selected, .summary.selected {
+  outline: 5px solid black;
+  opacity: 0.9;
+  z-index: 2;
+}

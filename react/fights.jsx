@@ -184,13 +184,16 @@ var App = React.createClass({
       <div className="app text-center">
         <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
         <BackButton back={this.removeCharacter} />
+        <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players}
+                   characterData={this.state.characterData} selectedChars={this.state.characters}
+                   winner={this.state.winner} selectWinner={this.selectWinner} />
         <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} />
       </div>
     );
   }
 })
 
-var CharacterSelect = React.createClass({
+var Character = React.createClass({
   handleClick: function() {
     if (!this.props.summary) {
       this.props.addCharacter(this.props.data.id);
@@ -208,7 +211,7 @@ var CharacterSelect = React.createClass({
     });
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
-      <div className="character-box box" onClick={this.handleClick}>
+      <div className="box" onClick={this.handleClick}>
         <img src={'/img/chars/select/select_'+select+'.png'} className={classes} />
       </div>
     );
@@ -220,7 +223,6 @@ var Characters = React.createClass({
     if (!this.props.data.length) {
       return (<div />);
     }
-
     var charRows = [
       [23, 22, 35, 1, 49, 40, 2, 47, 7, 6, 30, 19],
       [18, 50, 42, 12, 45, 41, 51, 37, 34, 24, 14, 39, 9],
@@ -244,7 +246,7 @@ var Characters = React.createClass({
           players.push(i+1);
         }
       });
-      return (<CharacterSelect key={c.id} data={c} players={players} addCharacter={this.props.addCharacter}/>);
+      return (<Character key={c.id} data={c} players={players} addCharacter={this.props.addCharacter}/>);
     }
     makeChar = makeChar.bind(this)
 
@@ -283,51 +285,59 @@ var Characters = React.createClass({
 //   }
 // })
 
-// var Summary = React.createClass({
-//   handleClick: function() {
-//     if (this.props.player) {
-//       this.props.selectWinner(this.props.player.id);
-//     }
-//   },
-//   render: function() {
-//     var character = this.props.char ? <Character data={this.props.char} players={[]} summary={true} /> : null
-//     var classes = "summary " + (this.props.selected ? 'selected' : '');
-//     return (
-//       <div className="summary-box box" onClick={this.handleClick} >
-//         <img src={'img/players/p'+this.props.id+'-display.png'} className={classes} />
-//         {character}
-//         <span className="summary-text">{this.props.player ? this.props.player.name : ''}</span>
-//         {this.props.selected ? <span className="summary-winner">Winner!!!</span> : ''}
-//       </div>
-//     );
-//   }
-// })
-// var Summaries = React.createClass({
-//   render: function() {
-//     if (!this.props.playerData.length || !this.props.characterData.length) {
-//       return (<div />);
-//     }
-//     var ids = [1, 2, 3, 4];
-//     var selectedPlayers = this.props.selectedPlayers.map(function(s) {
-//       return _.find(this.props.playerData, {id: s});
-//     }.bind(this));
-//     var selectedChars = this.props.selectedChars.map(function(s) {
-//       return _.find(this.props.characterData, {id: s});
-//     }.bind(this));
-//     var summaries = _.zip(ids, selectedPlayers, selectedChars);
+var CharacterSummary = React.createClass({
+  render: function() {
+    return (
+      <img src={'/img/chars/'+this.props.data.img} className="character-summary" />
+    );
+  }
+});
 
-//     function makeSummary(p) {
-//       var selected = p[1] && p[1].id == this.props.winner;
-//       return (<Summary key={p[0]} id={p[0]} player={p[1]} char={p[2]} selected={selected} selectWinner={this.props.selectWinner} />);
-//     }
-//     makeSummary = makeSummary.bind(this);
-//     return (
-//       <div className="summaries">
-//         { summaries.map(makeSummary.bind(this)) }
-//       </div>
-//     );
-//   }
-// });
+var Summary = React.createClass({
+  handleClick: function() {
+    if (this.props.player) {
+      this.props.selectWinner(this.props.player.id);
+    }
+  },
+  render: function() {
+    var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
+    var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
+    var classes = "box summary " + (this.props.selected ? 'selected' : '');
+    return (
+      <div className={classes}>
+        {character}
+        <span className="summary-text">{this.props.player ? this.props.player.name : ''}</span>
+        {winnerButton}
+        {this.props.selected ? <span className="summary-winner">Winner!!!</span> : ''}
+      </div>
+    );
+  }
+})
+var Summaries = React.createClass({
+  render: function() {
+    if (!this.props.playerData.length || !this.props.characterData.length) {
+      return (<div />);
+    }
+    var selectedPlayers = this.props.selectedPlayers.map(function(s) {
+      return _.find(this.props.playerData, {id: s});
+    }.bind(this));
+    var selectedChars = this.props.selectedChars.map(function(s) {
+      return _.find(this.props.characterData, {id: s});
+    }.bind(this));
+    var summaries = _.zip([1, 2], selectedPlayers, selectedChars);
+
+    function makeSummary(p) {
+      var selected = p[1] && p[1].id == this.props.winner;
+      return (<Summary key={p[0]} id={p[0]} player={p[1]} char={p[2]} selected={selected} selectWinner={this.props.selectWinner} />);
+    }
+    makeSummary = makeSummary.bind(this);
+    return (
+      <div className="summaries">
+        { summaries.map(makeSummary.bind(this)) }
+      </div>
+    );
+  }
+});
 
 var Stage = React.createClass({
   handleClick: function() {
