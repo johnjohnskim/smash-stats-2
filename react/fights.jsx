@@ -52,7 +52,7 @@ var App = React.createClass({
       expectations: [],
       charExpectations: [],
       playerQueue: [],
-      // basic: easiest to input, pro: fastest to input, doubles: 2v2
+      // basic: easiest to input, doubles: 2v2
       // enterType: 'basic',
       errorMsg: '',
       isFightAdded: false,
@@ -60,21 +60,21 @@ var App = React.createClass({
       stageFilter: ''
     };
   },
-  selectPlayer: function(p, pos) {
-    p = +p;
+  selectPlayer: function(pid, pos) {
+    pid = +pid;
     pos--;
     var newPlayers = this.state.players.slice();
-    if ((pos === 0 && newPlayers[1] != p)  || (pos === 1 && newPlayers[0] != p)) {
-      newPlayers[pos] = p;
+    if ((pos === 0 && newPlayers[1] != pid)  || (pos === 1 && newPlayers[0] != pid)) {
+      newPlayers[pos] = pid;
     }
     this.setState({
       players: newPlayers
     }, this.calculateRating);
   },
-  addPlayer: function(p) {
-    if (this.state.players.length < 2 && this.state.players.indexOf(p) == -1) {
+  addPlayer: function(pid) {
+    if (this.state.players.length < 2 && this.state.players.indexOf(pid) == -1) {
       this.setState({
-        players: this.state.players.concat([p])
+        players: this.state.players.concat([pid])
       }, this.calculateRating);
     }
   },
@@ -90,23 +90,23 @@ var App = React.createClass({
       });
     }
   },
-  queuePlayer: function(p) {
-    if (this.state.playerQueue.indexOf(p) == -1) {
-      this.addPlayer(p);
+  queuePlayer: function(pid) {
+    if (this.state.playerQueue.indexOf(pid) == -1) {
+      this.addPlayer(pid);
       this.setState({
-        playerQueue: this.state.playerQueue.concat([p])
+        playerQueue: this.state.playerQueue.concat([pid])
       });
     }
   },
-  dequeuePlayer: function(p) {
-    p = +p;
+  dequeuePlayer: function(pid) {
+    pid = +pid;
     function notPlayer(x) {
-      return x != p;
+      return x != pid;
     }
 
     var players = this.state.players.slice();
     var playerQueue = this.state.playerQueue.filter(notPlayer);
-    if (players.indexOf(p) > -1) {
+    if (players.indexOf(pid) > -1) {
       players = players.filter(notPlayer);
       if (playerQueue.length > 1) {
         players = players.concat(playerQueue[1]);
@@ -117,10 +117,10 @@ var App = React.createClass({
       players: players
     });
   },
-  addCharacter: function(c) {
+  addCharacter: function(cid) {
     if (this.state.characters.length < 2) {
       this.setState({
-        characters: this.state.characters.concat([c])
+        characters: this.state.characters.concat([cid])
       }, this.calculateRating);
     }
   },
@@ -131,14 +131,17 @@ var App = React.createClass({
       });
     }
   },
-  selectStage: function(s) {
+  selectStage: function(sid) {
     this.setState({
-      stage: s
+      stage: sid
     });
   },
-  selectWinner: function(w) {
+  searchStage: function(s) {
+
+  },
+  selectWinner: function(wid) {
     this.setState({
-      winner: w
+      winner: wid
     });
   },
   calculateRating: function() {
@@ -442,12 +445,12 @@ var Summaries = React.createClass({
     }.bind(this));
     var summaries = _.zip([1, 2], selectedPlayers, selectedChars, this.props.expectations, this.props.charExpectations, this.props.rating);
 
-    function makeSummary(p) {
-      var selected = p[1] && p[1].id == this.props.winner;
+    function makeSummary(s) {
+      var selected = s[1] && s[1].id == this.props.winner;
       return (
-        <Summary key={p[0]} id={p[0]} playerData={this.props.playerData} player={p[1]} char={p[2]}
+        <Summary key={s[0]} id={s[0]} playerData={this.props.playerData} player={s[1]} char={s[2]}
           selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner}
-          expectation={p[3]} charExpectation={p[4]} rating={p[5]} />
+          expectation={s[3]} charExpectation={s[4]} rating={s[5]} />
       );
     }
     makeSummary = makeSummary.bind(this);
@@ -493,7 +496,7 @@ var BackButton = React.createClass({
   },
   render: function() {
     return (
-      <button className="btn btn-default back" onClick={this.back}>Back</button>
+      <button className="btn btn-default back" onClick={this.back}>Remove</button>
     );
   }
 });
