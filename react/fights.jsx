@@ -136,8 +136,10 @@ var App = React.createClass({
       stage: sid
     });
   },
-  searchStage: function(s) {
-
+  searchStage: function(text) {
+    this.setState({
+      stageFilter: text
+    });
   },
   selectWinner: function(wid) {
     this.setState({
@@ -233,7 +235,8 @@ var App = React.createClass({
       notes: '',
       expectations: [],
       charExpectations: [],
-      errorMsg: '',
+      stageFilter: '',
+      errorMsg: ''
     });
   },
   addNewPlayer: function(name) {
@@ -258,7 +261,8 @@ var App = React.createClass({
                    characterData={this.state.characterData} selectedChars={this.state.characters}
                    winner={this.state.winner} selectWinner={this.selectWinner}
                    expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
-        <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} />
+        <StageSearch searchStage={this.searchStage} />
+        <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
         <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
       </div>
     );
@@ -462,12 +466,32 @@ var Summaries = React.createClass({
   }
 });
 
+var StageSearch = React.createClass({
+  handleKeypress: _.throttle(function() {
+    this.props.searchStage(this.refs.search.getDOMNode().value);
+  }, 100),
+  render: function() {
+    return (
+      <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+    );
+  }
+});
+
 var Stage = React.createClass({
   handleClick: function() {
     this.props.selectStage(this.props.data.id);
   },
   render: function() {
-    var classes = "stage " + (this.props.selected ? 'selected' : '');
+    var cx = React.addons.classSet;
+    var filter = this.props.filter.toLowerCase();
+    var matched = !filter || (filter && this.props.data.name.toLowerCase().indexOf(filter) > -1);
+    var classes = cx({
+      'stage' : true,
+      'selected': this.props.selected,
+      'matched': matched,
+      'unmatched': !matched
+    });
+
     return (
       <img src={'img/stages/'+this.props.data.img} className={classes} onClick={this.handleClick} />
     );
@@ -479,7 +503,7 @@ var Stages = React.createClass({
       return (<div />);
     }
     function makeStage(s) {
-      return (<Stage key={s.id} data={s} selected={this.props.selected == s.id} selectStage={this.props.selectStage} />);
+      return (<Stage key={s.id} data={s} selected={this.props.selected == s.id} selectStage={this.props.selectStage} filter={this.props.filter} />);
     }
     makeStage = makeStage.bind(this);
     return (
