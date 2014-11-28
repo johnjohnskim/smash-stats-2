@@ -41,6 +41,16 @@ gulp.task('reactify', function() {
     .pipe(gulp.dest('./build/js'))
 });
 
+gulp.task('uglify', function() {
+  gulp.src('public/js/*.js')
+    .pipe(uglify())
+    .pipe(rename(function(path) {
+      path.basename += '.min';
+      path.extname = '.js';
+    }))
+    .pipe(gulp.dest('./build/js'))
+});
+
 gulp.task('server', function() {
   nodemon({
     script: 'app.js',
@@ -61,5 +71,5 @@ gulp.task('watch', function() {
     .on('change', livereload.changed)
 });
 
-gulp.task('dev', ['watch', 'less', 'reactify', 'server']);
-gulp.task('default', ['less', 'reactify']);
+gulp.task('dev', ['watch', 'less', 'reactify', 'uglify', 'server']);
+gulp.task('default', ['less', 'reactify', 'uglify']);

@@ -19,10 +19,12 @@ router.route('/login')
     } else if (username == 'quovo' && password == appPassword) {
       req.session.username = 'quovo';
       res.cookie('username', 'quovo');
-      res.redirect('/');
+      // res.redirect('/');
+      res.end('ok');
     } else if (username == 'guest' && password == guestPassword) {
       req.session.username = 'guest';
-      res.redirect('/');
+      // res.redirect('/');
+      res.end('ok');
     } else {
       res.end('Invalid username or password');
     }
