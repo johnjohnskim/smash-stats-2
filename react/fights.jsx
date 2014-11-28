@@ -58,40 +58,45 @@ var App = React.createClass({
       stageFilter: ''
     };
   },
-  // selectPlayer: function(p, pos) {
-  //   var newPlayers = _.extend({}, this.state.players);
-  //   newPlayers[pos] = p;
-  //   this.setState({
-  //     players: newPlayers
-  //   });
-  // },
-  // addPlayer: function(p) {
-  //   if (this.state.players.length < 2 && this.state.players.indexOf(p) == -1) {
-  //     this.setState({
-  //       players: this.state.players.concat([p])
-  //     });
-  //   }
-  // },
-  // removePlayer: function() {
-  //   if (this.state.players.length) {
-  //     if (this.state.winner == this.state.players[this.state.players.length - 1]) {
-  //       this.setState({
-  //         winner: 0
-  //       });
-  //     }
-  //     this.setState({
-  //       players: this.state.players.slice(0, this.state.players.length - 1)
-  //     });
-  //   }
-  // },
+  selectPlayer: function(p, pos) {
+    p = +p;
+    pos--;
+    var newPlayers = this.state.players.slice();
+    if ((pos === 0 && newPlayers[1] != p)  || (pos === 1 && newPlayers[0] != p)) {
+      newPlayers[pos] = p;
+    }
+    this.setState({
+      players: newPlayers
+    });
+  },
   addPlayer: function(p) {
+    if (this.state.players.length < 2 && this.state.players.indexOf(p) == -1) {
+      this.setState({
+        players: this.state.players.concat([p])
+      });
+    }
+  },
+  removePlayer: function() {
+    if (this.state.players.length) {
+      if (this.state.winner == this.state.players[this.state.players.length - 1]) {
+        this.setState({
+          winner: 0
+        });
+      }
+      this.setState({
+        players: this.state.players.slice(0, this.state.players.length - 1)
+      });
+    }
+  },
+  queuePlayer: function(p) {
     if (this.state.playerQueue.indexOf(p) == -1) {
+      this.addPlayer(p);
       this.setState({
         playerQueue: this.state.playerQueue.concat([p])
       });
     }
   },
-  removePlayer: function(p) {
+  dequeuePlayer: function(p) {
     this.setState({
       playerQueue: this.state.playerQueue.filter(function(x) {
         return x != p;
@@ -136,6 +141,7 @@ var App = React.createClass({
       });
       return;
     }
+    // TODO: calculate ELO change. probably should display the elo to gain/lose on the fights page
     // add the fight
     var winner = this.state.winner;
     $.post('/api/fights', {
@@ -178,18 +184,18 @@ var App = React.createClass({
     }.bind(this));
   },
   render: function() {
-    //     <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
     return (
       <div className="app text-center">
         <AddPlayer addPlayer={this.addNewPlayer} />
-        <Players data={this.state.playerData} queue={this.state.playerQueue} addPlayer={this.addPlayer} />
-        <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} removePlayer={this.removePlayer} />
+        <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
+        <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
         <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
         <BackButton back={this.removeCharacter} />
-        <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players}
+        <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer}
                    characterData={this.state.characterData} selectedChars={this.state.characters}
                    winner={this.state.winner} selectWinner={this.selectWinner} />
         <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} />
+        <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
       </div>
     );
   }
@@ -197,7 +203,7 @@ var App = React.createClass({
 
 var Player = React.createClass({
   handleClick: function() {
-    this.props.addPlayer(this.props.data.id);
+    this.props.queuePlayer(this.props.data.id);
   },
   render: function() {
     return (
@@ -208,14 +214,14 @@ var Player = React.createClass({
 var Players = React.createClass({
   render: function() {
     return (
-      <div>{ this.props.data.map(function(p) {return (<Player key={p.id} selected={this.props.queue.indexOf(p.id) > -1} data={p} addPlayer={this.props.addPlayer} />);}.bind(this)) }</div>
+      <div>{ this.props.data.map(function(p) {return (<Player key={p.id} selected={this.props.queue.indexOf(p.id) > -1} data={p} queuePlayer={this.props.queuePlayer} />);}.bind(this)) }</div>
     );
   }
 });
 
 var PlayerQueue = React.createClass({
   handleClick: function(event) {
-    this.props.removePlayer(event.target.parentElement.getAttribute('data-id'));
+    this.props.dequeuePlayer(event.target.parentElement.getAttribute('data-id'));
   },
   render: function() {
     var players = this.props.queue.map(function(p) {
@@ -328,16 +334,21 @@ var Summary = React.createClass({
       this.props.selectWinner(this.props.player.id);
     }
   },
+  handleSelect: function(event) {
+    this.props.selectPlayer(event.target.value, this.props.id);
+  },
   render: function() {
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
-    var classes = "box summary " + (this.props.selected ? 'selected' : '');
+    var classes = "summary " + (this.props.selected ? 'selected' : '');
     return (
       <div className={classes}>
         {character}
-        <span className="summary-text">{this.props.player ? this.props.player.name : ''}</span>
+        {/*<span className="summary-text">{this.props.player ? this.props.player.name : ''}</span>*/}
+        <select value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
+           {this.props.playerData.map(function(p) {return (<option value={p.id}>{p.name}</option>);})}
+         </select>
         {winnerButton}
-        {this.props.selected ? <span className="summary-winner">Winner!!!</span> : ''}
       </div>
     );
   }
@@ -357,7 +368,10 @@ var Summaries = React.createClass({
 
     function makeSummary(p) {
       var selected = p[1] && p[1].id == this.props.winner;
-      return (<Summary key={p[0]} id={p[0]} player={p[1]} char={p[2]} selected={selected} selectWinner={this.props.selectWinner} />);
+      return (
+        <Summary key={p[0]} id={p[0]} playerData={this.props.playerData} player={p[1]} char={p[2]}
+          selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner} />
+      );
     }
     makeSummary = makeSummary.bind(this);
     return (
@@ -424,29 +438,29 @@ var AddPlayer = React.createClass({
   }
 });
 
-// var AddFight = React.createClass({
-//   addFight: function() {
-//     this.props.addFight();
-//   },
-//   clearFight: function() {
-//     this.props.clearFight();
-//   },
-//   render: function() {
-//     var cx = React.addons.classSet;
-//     var classes = cx({
-//       'btn' : true,
-//       'add-button': true,
-//       'btn-primary': !this.props.isFightAdded,
-//       'btn-success': this.props.isFightAdded
-//     });
-//     return (
-//       <div className="add-fight">
-//         <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add')}</button>
-//         <button className="btn btn-danger clear-button" onClick={this.clearFight}>Clear</button>
-//         <div className="error-msg"><strong>{this.props.errorMsg}</strong></div>
-//       </div>
-//     );
-//   }
-// });
+var AddFight = React.createClass({
+  addFight: function() {
+    this.props.addFight();
+  },
+  clearFight: function() {
+    this.props.clearFight();
+  },
+  render: function() {
+    var cx = React.addons.classSet;
+    var classes = cx({
+      'btn' : true,
+      'add-button': true,
+      'btn-primary': !this.props.isFightAdded,
+      'btn-success': this.props.isFightAdded
+    });
+    return (
+      <div className="add-fight">
+        <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add')}</button>
+        {/*<button className="btn btn-danger clear-button" onClick={this.clearFight}>Clear</button>*/}
+        <div className="error-msg"><strong>{this.props.errorMsg}</strong></div>
+      </div>
+    );
+  }
+});
 
 React.render(<App />, document.getElementById('app'));
