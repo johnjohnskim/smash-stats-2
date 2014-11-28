@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var api = require('./routes/api');
 var login = require('./routes/login');
+var fights = require('./routes/fights');
 var tables = require('./routes/tables');
 var graphs = require('./routes/graphs');
 
@@ -52,6 +53,7 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/api', api);
 app.use('/', login);
+app.use('/fights', fights);
 app.use('/tables', tables);
 app.use('/graphs', graphs);
 
