@@ -27,10 +27,11 @@ router.route('/players')
   })
   .post(function(req, res) {
     var name = req.body.name;
-    if (!name) {
-      return res.end('Need a name');
+    var rating = req.body.rating;
+    if (!name || !rating) {
+      return res.end('Need a name and rating');
     }
-    sql.insert("INSERT INTO u_players (name) VALUES ($1)", [req.body.name], function(err, id) {
+    sql.insert("INSERT INTO u_players (name, rating) VALUES ($1, $2)", [name, rating], function(err, id) {
       res.json(id);
     });
   })

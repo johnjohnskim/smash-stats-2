@@ -234,8 +234,10 @@ var App = React.createClass({
     });
   },
   addNewPlayer: function(name) {
-    $.post('/api/players', {name: name}, function(d) {
+    var defaultRating = 1200;
+    $.post('/api/players', {name: name, rating: defaultRating}, function(d) {
       d.name = name;
+      d.rating = defaultRating;
       this.setState({
         playerData: this.state.playerData.concat([d])
       });
@@ -397,15 +399,18 @@ var Summary = React.createClass({
     this.props.selectPlayer(this.refs.playerSelect.getDOMNode().value, this.props.id);
   },
   render: function() {
+    function convertPct(pct) {
+      return (Math.round(pct) * 100) + '%';
+    }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
     var classes = "summary " + (this.props.selected ? 'selected' : '');
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
         <div>Current rating: {this.props.player ? this.props.player.rating: ''}</div>
-        <div>Character win %: {this.props.char ? this.props.char.winpct : 'n/a'}</div>
-        <div>Chance to win: {this.props.expectation ? Math.round(this.props.expectation * 100)+'%' : ''}</div>
-        <div>Chance to win with character: {this.props.charExpectation ? Math.round(this.props.charExpectation * 100)+'%' : ''}</div>
+        <div>Character win %: {this.props.char ? convertPct(this.props.char.winpct) : 'n/a'}</div>
+        <div>Chance to win: {this.props.expectation ? convertPct(this.props.expectation) : ''}</div>
+        <div>Chance to win with character: {this.props.charExpectation ? convertPct(this.props.charExpectation) : ''}</div>
         <div>Rating to gain/lose: {this.props.rating}</div>
       </div>
     return (
