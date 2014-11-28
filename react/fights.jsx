@@ -99,10 +99,22 @@ var App = React.createClass({
     }
   },
   dequeuePlayer: function(p) {
+    p = +p;
+    function notPlayer(x) {
+      return x != p;
+    }
+
+    var players = this.state.players.slice();
+    var playerQueue = this.state.playerQueue.filter(notPlayer);
+    if (players.indexOf(p) > -1) {
+      players = players.filter(notPlayer);
+      if (playerQueue.length > 1) {
+        players = players.concat(playerQueue[1]);
+      }
+    }
     this.setState({
-      playerQueue: this.state.playerQueue.filter(function(x) {
-        return x != p;
-      })
+      playerQueue: playerQueue,
+      players: players
     });
   },
   addCharacter: function(c) {
@@ -182,9 +194,9 @@ var App = React.createClass({
       });
       return;
     }
-    // TODO: calculate ELO change. probably should display the elo to gain/lose on the fights page
     // add the fight
     var winner = this.state.winner;
+    var loser = this.state.players[0] == this.state.winner ? this.state.players[1] : this.state.players[0];
     $.post('/api/fights', {
       player1: this.state.players[0],
       player2: this.state.players[1],
@@ -196,9 +208,11 @@ var App = React.createClass({
     });
     // reset the state vars
     this.clearFight();
+    var playerQueue = [winner].concat(this.state.playerQueue.slice(2)).concat(loser);
     this.setState({
       isFightAdded: true,
-      players: [winner]
+      players: [winner, playerQueue[1]],
+      playerQueue: playerQueue
     });
     setTimeout(function() {
       this.setState({
@@ -398,10 +412,11 @@ var Summary = React.createClass({
       <div className={classes}>
         <div>{character}</div>
         <div>
-          <select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
+          {/*<select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
             <option value=''>Player</option>
             {this.props.playerData.map(function(p) {return (<option key={p.id} value={p.id}>{p.name}</option>);})}
-          </select>
+          </select>*/}
+          {this.props.player ? this.props.player.name : ''}
         </div>
         <div>{winnerButton}</div>
         {stats}
