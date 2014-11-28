@@ -20,12 +20,14 @@ var App = React.createClass({
       .defer(getData('/api/characters'))
       .defer(getData('/api/stages'))
       .await(function(err, players, characters, stages) {
+        // attach img filenames
         characters.forEach(function(c) {
           c.img = getImg(c.name) + '.png';
         });
         stages.forEach(function(s) {
           s.img = getImg(s.name) + '.jpg';
         });
+
         this.setState({
           playerData: players,
           characterData: characters,
@@ -121,6 +123,7 @@ var App = React.createClass({
       return;
     }
     // add the fight
+    var winner = this.state.winner;
     $.post('/api/fights', {
       player1: this.state.players[0],
       player2: this.state.players[1],
@@ -132,7 +135,8 @@ var App = React.createClass({
     // reset the state vars
     this.clearFight();
     this.setState({
-      isFightAdded: true
+      isFightAdded: true,
+      players: [winner]
     });
     setTimeout(function() {
       this.setState({
@@ -184,7 +188,7 @@ var App = React.createClass({
   }
 })
 
-var Character = React.createClass({
+var CharacterSelect = React.createClass({
   handleClick: function() {
     if (!this.props.summary) {
       this.props.addCharacter(this.props.data.id);
@@ -206,9 +210,10 @@ var Character = React.createClass({
     //     {selects}
     //   </div>
     // );
+    var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
       <div className="character-box box" onClick={this.handleClick}>
-        <img src={'/img/chars/'+this.props.data.img} className={classes} />
+        <img src={'/img/chars/select/select_'+select+'.png'} className={classes} />
       </div>
     );
   }
@@ -220,6 +225,22 @@ var Characters = React.createClass({
       return (<div />);
     }
 
+    var charRows = [
+      [23, 22, 35, 1, 49, 40, 2, 47, 7, 6, 30, 19],
+      [18, 50, 42, 12, 45, 41, 51, 37, 34, 24, 14, 39, 9],
+      [17, 16, 26, 11, 10, 36, 4, 20, 15, 13, 38, 31, 3],
+      [46, 32, 48, 43, 8, 5, 21, 33, 25, 44],
+    ];
+    var pos = 1;
+    // replace ids with character object and attach select position
+    charRows.forEach(function(row, i) {
+      row.forEach(function(c, j) {
+        var character = _.find(this.props.data, {id: c});
+        character.select = pos++;
+        row[j] = character;
+      }.bind(this))
+    }.bind(this));
+
     function makeChar(c) {
       var players = [];
       this.props.selected.forEach(function(s, i) {
@@ -227,13 +248,21 @@ var Characters = React.createClass({
           players.push(i+1);
         }
       });
-      return (<Character key={c.id} data={c} players={players} addCharacter={this.props.addCharacter}/>);
+      return (<CharacterSelect key={c.id} data={c} players={players} addCharacter={this.props.addCharacter}/>);
     }
     makeChar = makeChar.bind(this)
 
+    function makeCharRow(row, i) {
+      return (
+        <div key={i} className="character-row">
+          {row.map(makeChar)}
+        </div>
+      );
+    }
+
     return (
       <div className="characters">
-        {this.props.data.map(makeChar)}
+        {charRows.map(makeCharRow)}
       </div>
     );
   }
