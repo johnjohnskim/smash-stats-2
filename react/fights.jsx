@@ -183,6 +183,7 @@ var App = React.createClass({
     return (
       <div className="app text-center">
         <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
+        <BackButton back={this.removeCharacter} />
       </div>
     );
   }
@@ -195,21 +196,15 @@ var CharacterSelect = React.createClass({
     }
   },
   render: function() {
+    var players = this.props.players;
     var cx = React.addons.classSet;
-    // var selects = this.props.players.map(function(p, i) {
-    //   return (<Select key={i} player={p} />);
-    // });
     var classes = cx({
       'character': true,
-      'summary-char': this.props.summary,
-      // 'selected': selects.length
+      'selected': players.length,
+      'selected-p1': players.length == 1 && players[0] == 1,
+      'selected-p2': players.length == 1 && players[0] == 2,
+      'selected-both': players.length == 2
     });
-    // return (
-    //   <div className="character-box box" onClick={this.handleClick}>
-    //     <img src={'img/characters/'+this.props.data.img} className={classes} />
-    //     {selects}
-    //   </div>
-    // );
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
       <div className="character-box box" onClick={this.handleClick}>
@@ -333,15 +328,6 @@ var Characters = React.createClass({
 //   }
 // });
 
-// var Select = React.createClass({
-//   render: function() {
-//     var classes = 'select + p' + this.props.player;
-//     return (
-//       <img src={'img/players/p'+this.props.player+'-select.png'} className={classes} />
-//     );
-//   }
-// })
-
 // var Stage = React.createClass({
 //   handleClick: function() {
 //     this.props.selectStage(this.props.data.id);
@@ -388,24 +374,16 @@ var Characters = React.createClass({
 //   }
 // });
 
-// var Buttons = React.createClass({
-//   reset: function() {
-//     this.props.reset();
-//   },
-//   back: function() {
-//     this.props.back();
-//   },
-//   render: function() {
-//     return (
-//       <div className="clearfix">
-//         <div className="pull-right">
-//           <button className="btn btn-default back" onClick={this.back}>Back</button>
-//           <button className="btn btn-default reset" onClick={this.reset}>Reset</button>
-//         </div>
-//       </div>
-//     );
-//   }
-// });
+var BackButton = React.createClass({
+  back: function() {
+    this.props.back();
+  },
+  render: function() {
+    return (
+      <button className="btn btn-default back" onClick={this.back}>Back</button>
+    );
+  }
+});
 
 // var AddPlayer = React.createClass({
 //   handleClick: function() {
