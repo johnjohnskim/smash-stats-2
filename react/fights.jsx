@@ -146,6 +146,24 @@ var App = React.createClass({
       winner: wid
     });
   },
+  addNotes: function(notes) {
+    this.setState({
+      notes: notes
+    });
+  },
+  addNotesTag: function(tag, isChecked) {
+    var notes = this.state.notes;
+    if (isChecked) {
+      notes = notes ? notes + ' ' : '';
+      notes += tag;
+    } else {
+      notes = notes.replace(' ' + tag, '');
+      notes = notes.replace(tag, '');
+    }
+    this.setState({
+      notes: notes
+    });
+  },
   calculateRating: function() {
     if (this.state.players.length < 2 || this.state.characters.length < 2) {
       return;
@@ -209,7 +227,8 @@ var App = React.createClass({
       character2: this.state.characters[1],
       stage: this.state.stage,
       winner: this.state.winner,
-      rating: this.state.players[0] == this.state.winner ? this.state.rating[0] : this.state.rating[1]
+      rating: this.state.players[0] == this.state.winner ? this.state.rating[0] : this.state.rating[1],
+      notes: this.state.notes
     });
     // reset the state vars
     this.clearFight();
@@ -263,6 +282,7 @@ var App = React.createClass({
                    expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
         <StageSearch searchStage={this.searchStage} />
         <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
+        <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
         <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
       </div>
     );
@@ -289,7 +309,7 @@ var Players = React.createClass({
 
 var PlayerQueue = React.createClass({
   handleClick: function(event) {
-    this.props.dequeuePlayer(event.target.parentElement.getAttribute('data-id'));
+    this.props.dequeuePlayer(event.target.getAttribute('value'));
   },
   render: function() {
     var players = this.props.queue.map(function(p) {
@@ -300,8 +320,8 @@ var PlayerQueue = React.createClass({
       var classes = 'player-item';
       classes += this.props.selectedPlayers.indexOf(p.id) > -1 ? ' selected' : '';
       return (
-        <li key={p.id} data-id={p.id} className={classes} >
-          {p.name} <span onClick={this.handleClick} className="remove-player" >x</span>
+        <li key={p.id} className={classes} >
+          {p.name} <span className="remove-player" onClick={this.handleClick} value={p.id}>x</span>
         </li>
       );
     }
@@ -509,6 +529,36 @@ var Stages = React.createClass({
     return (
       <div>
         { this.props.data.map(makeStage) }
+      </div>
+    );
+  }
+});
+
+var Notes = React.createClass({
+  handleKeypress: function() {
+    this.props.addNotes(this.refs.notes.getDOMNode().value);
+  },
+  handleCheck: function(event) {
+    this.props.addNotesTag(event.target.value, event.target.checked);
+  },
+  render: function() {
+    var tags = [
+      ['3 stocked', '#3stock'],
+      ['Mew sighting', '#mew'],
+      ['Bullshit item drops', '#bullshit']
+    ];
+    tags = tags.map(function(t) {
+      return (
+        <label key={t[1]}> {t[0]}
+          <input type="checkbox" className="form-control" value={t[1]} onChange={this.handleCheck} />
+        </label>
+      );
+    }.bind(this))
+    return (
+      <div>
+        {tags}
+        <input type="text" className="form-control" placeholder="Notes..."
+          ref="notes" value={this.props.data} onChange={this.handleKeypress} />
       </div>
     );
   }
