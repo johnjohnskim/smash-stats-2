@@ -1,23 +1,23 @@
 // var queue = require('queue-async');
 
-function getData(url) {
-  return function(callback) {
-    $.getJSON(url, {}, function(data) {
-      callback(null, data);
-    });
-  };
-}
-
-// name -> img filename
-function getImg(name) {
-  return name.toLowerCase().replace(/[\.\']/g, '').replace(/\s/g, '_').replace('é', 'e');
-}
-
 var App = React.createClass({
   componentDidMount: function() {
+    // wrapper around getJSON for queue
+    function getData(url) {
+      return function(callback) {
+        $.getJSON(url, {}, function(data) {
+          callback(null, data);
+        });
+      };
+    }
+    // name -> img filename
+    function getImg(name) {
+      return name.toLowerCase().replace(/[\.\']/g, '').replace(/\s/g, '_').replace('é', 'e');
+    }
+
     queue()
       .defer(getData('/api/players'))
-      .defer(getData('/api/characters'))
+      .defer(getData('/api/characterfights'))
       .defer(getData('/api/stages'))
       .await(function(err, players, characters, stages) {
         // attach img filenames
@@ -46,14 +46,16 @@ var App = React.createClass({
       characters: [],
       stage: 0,
       winner: 0,
-      rating: 0,
+      rating: [],
       notes: '',
       // other
+      expectations: [],
+      charExpectations: [],
+      playerQueue: [],
       // basic: easiest to input, pro: fastest to input, doubles: 2v2
-      enterType: 'basic',
+      // enterType: 'basic',
       errorMsg: '',
       isFightAdded: false,
-      playerQueue: [],
       characterFilter: '',
       stageFilter: ''
     };
@@ -67,13 +69,13 @@ var App = React.createClass({
     }
     this.setState({
       players: newPlayers
-    });
+    }, this.calculateRating);
   },
   addPlayer: function(p) {
     if (this.state.players.length < 2 && this.state.players.indexOf(p) == -1) {
       this.setState({
         players: this.state.players.concat([p])
-      });
+      }, this.calculateRating);
     }
   },
   removePlayer: function() {
@@ -107,7 +109,7 @@ var App = React.createClass({
     if (this.state.characters.length < 2) {
       this.setState({
         characters: this.state.characters.concat([c])
-      });
+      }, this.calculateRating);
     }
   },
   removeCharacter: function() {
@@ -125,6 +127,45 @@ var App = React.createClass({
   selectWinner: function(w) {
     this.setState({
       winner: w
+    });
+  },
+  calculateRating: function() {
+    if (this.state.players.length < 2 || this.state.characters.length < 2) {
+      return;
+    }
+    var p1 = _.find(this.state.playerData, {id: this.state.players[0]});
+    var p2 = _.find(this.state.playerData, {id: this.state.players[1]});
+    var c1 = _.find(this.state.characterData, {id: this.state.characters[0]});
+    var c2 = _.find(this.state.characterData, {id: this.state.characters[1]});
+
+    var p1rating = p1.rating;
+    var p2rating = p2.rating;
+    // +rating = m * (100*(win/total) - 50)
+      // m is a modifier on how much character performance affects the final expectation
+    //   m = 2, 75% - 25%; m = 5, 95% - 5%
+
+    var expectations = [];
+    expectations[0] = 1.0 / (1.0 + Math.pow(10.0, ((p2rating - p1rating)/400.0)));
+    expectations[1] = 1.0 / (1.0 + Math.pow(10.0, ((p1rating - p2rating)/400.0)));
+
+    var m = 5;
+    var c1pct = c1.total > 5 && c1.winpct ? c1.winpct : 0.50;
+    var c2pct = c2.total > 5 && c2.winpct ? c2.winpct : 0.50;
+    p1rating += m * ((100 * (c1pct || 0.50)) - 50);
+    p2rating += m * ((100 * (c2pct || 0.50)) - 50);
+
+    var charExpectations = [];
+    charExpectations[0] = 1.0 / (1.0 + Math.pow(10.0, ((p2rating - p1rating)/400.0)));
+    charExpectations[1] = 1.0 / (1.0 + Math.pow(10.0, ((p1rating - p2rating)/400.0)));
+
+    var k = 24;
+    var p1wins = [k * (1.0 - expectations[0]), k * (0.0 - expectations[1])];
+    var p2wins = [k * (0.0 - expectations[0]), k * (1.0 - expectations[1])];
+
+    this.setState({
+      expectations: expectations,
+      charExpectations: charExpectations,
+      rating: [Math.round(p1wins[0]), Math.round(p2wins[1])]
     });
   },
   addFight: function() {
@@ -151,6 +192,7 @@ var App = React.createClass({
       character2: this.state.characters[1],
       stage: this.state.stage,
       winner: this.state.winner,
+      rating: this.state.players[0] == this.state.winner ? this.state.rating[0] : this.state.rating[1]
     });
     // reset the state vars
     this.clearFight();
@@ -170,8 +212,10 @@ var App = React.createClass({
       characters: [],
       stage: 0,
       winner: 0,
-      rating: 0,
+      rating: [],
       notes: '',
+      expectations: [],
+      charExpectations: [],
       errorMsg: '',
     });
   },
@@ -193,7 +237,8 @@ var App = React.createClass({
         <BackButton back={this.removeCharacter} />
         <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer}
                    characterData={this.state.characterData} selectedChars={this.state.characters}
-                   winner={this.state.winner} selectWinner={this.selectWinner} />
+                   winner={this.state.winner} selectWinner={this.selectWinner}
+                   expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
         <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} />
         <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
       </div>
@@ -341,14 +386,25 @@ var Summary = React.createClass({
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
     var classes = "summary " + (this.props.selected ? 'selected' : '');
+    var stats = !this.props.player || !this.props.char ? null :
+      <div className='summary-stats'>
+        <div>Current rating: {this.props.player ? this.props.player.rating: ''}</div>
+        <div>Character win %: {this.props.char ? this.props.char.winpct : 'n/a'}</div>
+        <div>Chance to win: {this.props.expectation ? Math.round(this.props.expectation * 100)+'%' : ''}</div>
+        <div>Chance to win with character: {this.props.charExpectation ? Math.round(this.props.charExpectation * 100)+'%' : ''}</div>
+        <div>Rating to gain/lose: {this.props.rating}</div>
+      </div>
     return (
       <div className={classes}>
-        {character}
-        {/*<span className="summary-text">{this.props.player ? this.props.player.name : ''}</span>*/}
-        <select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
-           {this.props.playerData.map(function(p) {return (<option key={p.id} value={p.id}>{p.name}</option>);})}
-         </select>
-        {winnerButton}
+        <div>{character}</div>
+        <div>
+          <select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
+            <option value=''>Player</option>
+            {this.props.playerData.map(function(p) {return (<option key={p.id} value={p.id}>{p.name}</option>);})}
+          </select>
+        </div>
+        <div>{winnerButton}</div>
+        {stats}
       </div>
     );
   }
@@ -364,13 +420,14 @@ var Summaries = React.createClass({
     var selectedChars = this.props.selectedChars.map(function(s) {
       return _.find(this.props.characterData, {id: s});
     }.bind(this));
-    var summaries = _.zip([1, 2], selectedPlayers, selectedChars);
+    var summaries = _.zip([1, 2], selectedPlayers, selectedChars, this.props.expectations, this.props.charExpectations, this.props.rating);
 
     function makeSummary(p) {
       var selected = p[1] && p[1].id == this.props.winner;
       return (
         <Summary key={p[0]} id={p[0]} playerData={this.props.playerData} player={p[1]} char={p[2]}
-          selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner} />
+          selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner}
+          expectation={p[3]} charExpectation={p[4]} rating={p[5]} />
       );
     }
     makeSummary = makeSummary.bind(this);

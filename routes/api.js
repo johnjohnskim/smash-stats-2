@@ -127,4 +127,13 @@ ratingViews.forEach(function(v) {
     })
 });
 
+router.route('/characterfights')
+  .get(function(req, res) {
+    sql.getRows("SELECT c.*, m.wins, m.total, m.winpct FROM characters c JOIN charactermeta m ON m.name=c.name",
+      null,
+      function(err, rows) {
+        res.json(rows);
+      });
+  })
+
 module.exports = router;
