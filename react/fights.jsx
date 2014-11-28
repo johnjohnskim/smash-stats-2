@@ -334,8 +334,8 @@ var Summary = React.createClass({
       this.props.selectWinner(this.props.player.id);
     }
   },
-  handleSelect: function(event) {
-    this.props.selectPlayer(event.target.value, this.props.id);
+  handleSelect: function() {
+    this.props.selectPlayer(this.refs.playerSelect.getDOMNode().value, this.props.id);
   },
   render: function() {
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
@@ -345,8 +345,8 @@ var Summary = React.createClass({
       <div className={classes}>
         {character}
         {/*<span className="summary-text">{this.props.player ? this.props.player.name : ''}</span>*/}
-        <select value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
-           {this.props.playerData.map(function(p) {return (<option value={p.id}>{p.name}</option>);})}
+        <select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
+           {this.props.playerData.map(function(p) {return (<option key={p.id} value={p.id}>{p.name}</option>);})}
          </select>
         {winnerButton}
       </div>
