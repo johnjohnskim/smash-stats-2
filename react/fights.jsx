@@ -91,18 +91,13 @@ var App = React.createClass({
       });
     }
   },
-  // removePlayer: function() {
-  //   if (this.state.players.length) {
-  //     if (this.state.winner == this.state.players[this.state.players.length - 1]) {
-  //       this.setState({
-  //         winner: 0
-  //       });
-  //     }
-  //     this.setState({
-  //       players: this.state.players.slice(0, this.state.players.length - 1)
-  //     });
-  //   }
-  // },
+  removePlayer: function(p) {
+    this.setState({
+      playerQueue: this.state.playerQueue.filter(function(x) {
+        return x != p;
+      })
+    });
+  },
   addCharacter: function(c) {
     if (this.state.characters.length < 2) {
       this.setState({
@@ -183,16 +178,12 @@ var App = React.createClass({
     }.bind(this));
   },
   render: function() {
-    //     <AddPlayer addPlayer={this.addNewPlayer} />
-    //     <Players data={this.state.playerData} addPlayer={this.addPlayer} />
-    //     <Buttons reset={this.resetPlayers} back={this.removePlayer} />
     //     <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
-    //   </div>
-    // );
     return (
       <div className="app text-center">
+        <AddPlayer addPlayer={this.addNewPlayer} />
         <Players data={this.state.playerData} queue={this.state.playerQueue} addPlayer={this.addPlayer} />
-        <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} />
+        <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} removePlayer={this.removePlayer} />
         <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
         <BackButton back={this.removeCharacter} />
         <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players}
@@ -214,7 +205,6 @@ var Player = React.createClass({
     );
   }
 });
-
 var Players = React.createClass({
   render: function() {
     return (
@@ -224,13 +214,28 @@ var Players = React.createClass({
 });
 
 var PlayerQueue = React.createClass({
+  handleClick: function(event) {
+    this.props.removePlayer(event.target.parentElement.getAttribute('data-id'));
+  },
   render: function() {
     var players = this.props.queue.map(function(p) {
       return _.find(this.props.data, {id: p});
     }.bind(this));
+
+    function makePlayer(p) {
+      var classes = 'player-item';
+      classes += this.props.selectedPlayers.indexOf(p.id) > -1 ? ' selected' : '';
+      return (
+        <li key={p.id} data-id={p.id} className={classes} >
+          {p.name} <span onClick={this.handleClick} className="remove-player" >x</span>
+        </li>
+      );
+    }
+    makePlayer = makePlayer.bind(this);
+
     return (
-      <ul>
-        {players.map(function(p) {return (<li>{p.name}</li>);})}
+      <ul className='player-queue'>
+        {players.map(makePlayer)}
       </ul>
     );
   }
@@ -374,7 +379,6 @@ var Stage = React.createClass({
     );
   }
 });
-
 var Stages = React.createClass({
   render: function() {
     if (!this.props.data.length) {
@@ -403,22 +407,22 @@ var BackButton = React.createClass({
   }
 });
 
-// var AddPlayer = React.createClass({
-//   handleClick: function() {
-//     var name = this.refs.name.getDOMNode().value.trim();
-//     if (!name) return;
-//     this.props.addPlayer(name);
-//     this.refs.name.getDOMNode().value = '';
-//   },
-//   render: function() {
-//     return (
-//       <div className="add-player">
-//         <input type="text" className="form-control player-input" placeholder="New player..." ref="name" />
-//         <button className="btn btn-primary" onClick={this.handleClick}>Add</button>
-//       </div>
-//     );
-//   }
-// });
+var AddPlayer = React.createClass({
+  handleClick: function() {
+    var name = this.refs.name.getDOMNode().value.trim();
+    if (!name) return;
+    this.props.addPlayer(name);
+    this.refs.name.getDOMNode().value = '';
+  },
+  render: function() {
+    return (
+      <div className="add-player">
+        <input type="text" className="form-control player-input" placeholder="New player..." ref="name" />
+        <button className="btn btn-primary" onClick={this.handleClick}>Add</button>
+      </div>
+    );
+  }
+});
 
 // var AddFight = React.createClass({
 //   addFight: function() {
