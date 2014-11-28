@@ -25,7 +25,7 @@ INSERT INTO u_stages (name) VALUES
 ('Miiverse'),
 ('Mushroom Kingdom U'),
 ('Norfair'),
-('Onett '),
+('Onett'),
 ('Orbital Gate Assault'),
 ('Pac-Land'),
 ('Palutena''s Temple'),

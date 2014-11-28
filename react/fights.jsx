@@ -184,6 +184,7 @@ var App = React.createClass({
       <div className="app text-center">
         <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
         <BackButton back={this.removeCharacter} />
+        <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} />
       </div>
     );
   }
@@ -328,51 +329,34 @@ var Characters = React.createClass({
 //   }
 // });
 
-// var Stage = React.createClass({
-//   handleClick: function() {
-//     this.props.selectStage(this.props.data.id);
-//   },
-//   render: function() {
-//     var classes = "stage " + (this.props.selected ? 'selected' : '');
-//     return (
-//       <img src={'img/stages/'+this.props.data.img+'.jpg'} className={classes} onClick={this.handleClick} />
-//     );
-//   }
-// });
-// var Stages = React.createClass({
-//   render: function() {
-//     if (!this.props.data.length) {
-//       return (<div />);
-//     }
-//     var stages = [
-//       ['princess-peachs-castle', 'kongo-jungle', 'great-bay', 'yoshis-story', 'fountain-of-dreams', 'corneria'],
-//       ['rainbow-cruise', 'jungle-japes', 'temple', 'yoshis-island', 'green-greens', 'venom'],
-//       ['icicle-mountain', 'flat-zone'],
-//       ['brinstar', 'onett', 'mute-city', 'pokemon-stadium', 'kingdom'],
-//       ['brinstar-depths', 'fourside', 'big-blue', 'poke-floats', 'kingdom-ii'],
-//       ['battlefield', 'final-destination', 'past-dream-land', 'past-yoshis-island', 'past-kongo-jungle']
-//     ]
-//     stages = stages.map(function(row) {
-//       return row.map(function(s) { return _.find(this.props.data, {img: s}); }.bind(this));
-//     }.bind(this));
-//     function makeStage(s) {
-//       return (<Stage key={s.id} data={s} selected={this.props.selected == s.id} selectStage={this.props.selectStage} />);
-//     }
-//     makeStage = makeStage.bind(this);
-//     function makeStageRow(row, i) {
-//       return (
-//         <div key={i} className="character-row">
-//           {row.map(makeStage)}
-//         </div>
-//       );
-//     }
-//     return (
-//       <div>
-//         { stages.map(makeStageRow) }
-//       </div>
-//     );
-//   }
-// });
+var Stage = React.createClass({
+  handleClick: function() {
+    this.props.selectStage(this.props.data.id);
+  },
+  render: function() {
+    var classes = "stage " + (this.props.selected ? 'selected' : '');
+    return (
+      <img src={'img/stages/'+this.props.data.img} className={classes} onClick={this.handleClick} />
+    );
+  }
+});
+
+var Stages = React.createClass({
+  render: function() {
+    if (!this.props.data.length) {
+      return (<div />);
+    }
+    function makeStage(s) {
+      return (<Stage key={s.id} data={s} selected={this.props.selected == s.id} selectStage={this.props.selectStage} />);
+    }
+    makeStage = makeStage.bind(this);
+    return (
+      <div>
+        { this.props.data.map(makeStage) }
+      </div>
+    );
+  }
+});
 
 var BackButton = React.createClass({
   back: function() {
