@@ -10,7 +10,7 @@ CREATE VIEW stagemeta AS
  SELECT s.id, s.name, f.count total, CAST(f.ratingChange AS int) ratingChange
    FROM stages s
    LEFT JOIN (SELECT count(*) count, avg(abs(rating1)) ratingChange, stage
-              FROM fights GROUP BY stage) f ON f.stage=s.id
+              FROM fights GROUP BY stage) f ON f.stage=s.id;
 
 CREATE VIEW stagewins AS
  SELECT x.player,
