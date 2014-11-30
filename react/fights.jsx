@@ -548,9 +548,10 @@ var Notes = React.createClass({
       ['Bullshit item drops', '#bullshit']
     ];
     tags = tags.map(function(t) {
+      var checked = this.props.data.indexOf(t[1]) > -1;
       return (
         <label key={t[1]}> {t[0]}
-          <input type="checkbox" className="form-control" value={t[1]} onChange={this.handleCheck} />
+          <input type="checkbox" className="form-control" checked={checked} value={t[1]} onChange={this.handleCheck} />
         </label>
       );
     }.bind(this))
