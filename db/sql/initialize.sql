@@ -103,9 +103,9 @@ INSERT INTO u_characters (name) VALUES
 ('Mewtwo')
 ;
 
-INSERT INTO u_players (name) VALUES
-('John'),
-('Lowell'),
-('Luke'),
-('Brett')
+INSERT INTO u_players (name, rating) VALUES
+('John', 1200),
+('Lowell', 1200),
+('Luke', 1200),
+('Brett', 1200)
 ;

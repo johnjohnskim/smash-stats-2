@@ -194,13 +194,13 @@ var App = React.createClass({
     charExpectations[1] = 1.0 / (1.0 + Math.pow(10.0, ((p1rating - p2rating)/400.0)));
 
     var k = 24;
-    var p1wins = [k * (1.0 - expectations[0]), k * (0.0 - expectations[1])];
-    var p2wins = [k * (0.0 - expectations[0]), k * (1.0 - expectations[1])];
+    var p1wins = [Math.round(k * (1.0 - expectations[0])), Math.round(k * (0.0 - expectations[1]))];
+    var p2wins = [Math.round(k * (0.0 - expectations[0])), Math.round(k * (1.0 - expectations[1]))];
 
     this.setState({
       expectations: expectations,
       charExpectations: charExpectations,
-      rating: [Math.round(p1wins[0]), Math.round(p2wins[1])]
+      rating: [{win: p1wins[0], lose: p2wins[0]}, {win: p2wins[1], lose: p1wins[1]}]
     });
   },
   addFight: function() {
@@ -219,16 +219,37 @@ var App = React.createClass({
     }
     // add the fight
     var winner = this.state.winner;
-    var loser = this.state.players[0] == this.state.winner ? this.state.players[1] : this.state.players[0];
+    var player1 = this.state.players[0];
+    var player2 = this.state.players[1];
+    var loser = player1 == winner ? player2 : player1;
+    var rating1 = player1 == winner ? this.state.rating[0].win : this.state.rating[0].lose;
+    var rating2 = player2 == winner ? this.state.rating[1].win : this.state.rating[1].lose;
     $.post('/api/fights', {
-      player1: this.state.players[0],
-      player2: this.state.players[1],
+      player1: player1,
+      player2: player2,
       character1: this.state.characters[0],
       character2: this.state.characters[1],
       stage: this.state.stage,
       winner: this.state.winner,
-      rating: this.state.players[0] == this.state.winner ? this.state.rating[0] : this.state.rating[1],
+      rating1: rating1,
+      rating2: rating2,
       notes: this.state.notes
+    });
+    // update player ratings
+    var playerData = _.cloneDeep(this.state.playerData);
+    player1 = _.find(playerData, {id: player1});
+    player2 = _.find(playerData, {id: player2});
+    player1.rating = player1.rating + rating1;
+    player2.rating = player2.rating + rating2;
+    $.ajax({
+      url: '/api/players/' + player1.id,
+      data: {'rating': player1.rating},
+      type: 'put'
+    });
+    $.ajax({
+      url: '/api/players/' + player2.id,
+      data: {'rating': player2.rating},
+      type: 'put'
     });
     // reset the state vars
     this.clearFight();
@@ -236,7 +257,8 @@ var App = React.createClass({
     this.setState({
       isFightAdded: true,
       players: [winner, playerQueue[1]],
-      playerQueue: playerQueue
+      playerQueue: playerQueue,
+      playerData: playerData
     });
     setTimeout(function() {
       this.setState({
@@ -438,7 +460,7 @@ var Summary = React.createClass({
         <div>Character win %: {this.props.char ? convertPct(this.props.char.winpct) : 'n/a'}</div>
         <div>Chance to win: {this.props.expectation ? convertPct(this.props.expectation) : ''}</div>
         <div>Chance to win with character: {this.props.charExpectation ? convertPct(this.props.charExpectation) : ''}</div>
-        <div>Rating to gain/lose: {this.props.rating}</div>
+        <div>Rating to gain|lose: {this.props.rating ? this.props.rating.win : ''} | {this.props.rating ? this.props.rating.lose : ''}</div>
       </div>
     return (
       <div className={classes}>

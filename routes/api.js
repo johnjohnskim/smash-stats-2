@@ -49,7 +49,7 @@ router.route('/players/:pid')
 // FIGHTS
 var fightFields = [
    'player1', 'player2', 'character1', 'character2',
-   'stage', 'winner', 'rating', 'notes'
+   'stage', 'winner', 'rating1', 'rating2', 'notes'
   ];
 router.route('/fights')
   .get(function(req, res) {

@@ -24,7 +24,8 @@ CREATE VIEW fights AS
     p.name AS winnername,
     x.winnerchar,
     c.name AS winnercharname,
-    x.rating,
+    x.rating1,
+    x.rating2,
     x.notes
   FROM ( SELECT DISTINCT
             f.id,
@@ -40,7 +41,8 @@ CREATE VIEW fights AS
             f.stage,
             s.name AS stagename,
             f.winner,
-            f.rating,
+            f.rating1,
+            f.rating2,
             f.notes,
             CASE
               WHEN f.winner = f.player1 THEN f.character1

@@ -32,7 +32,8 @@ CREATE TABLE u_fights
   character2 integer NOT NULL REFERENCES u_characters,
   stage integer NOT NULL REFERENCES u_stages,
   winner integer NOT NULL REFERENCES u_players,
-  rating int,
+  rating1 int,
+  rating2 int,
   notes varchar(255)
 );
 
