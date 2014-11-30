@@ -166,7 +166,8 @@ var tableMeta = {
   'stagemeta': {
     'headers': [
       ['name', 'Name'],
-      ['total', 'Appearances']
+      ['total', 'Appearances'],
+      ['ratingchange', 'Avg rating change']
     ]
   },
   'characterwins': {
