@@ -36,6 +36,30 @@ CREATE VIEW stagewins AS
            FROM players p
             LEFT JOIN stages s ON true) x;
 
+CREATE VIEW charstagewins AS
+ SELECT x."character",
+    x.charactername,
+    x.stage,
+    x.stagename,
+    x.total,
+    x.wins,
+    CASE
+        WHEN x.total = 0 THEN NULL
+        ELSE cast(x.wins as float) / cast(x.total as float)
+    END AS winpct
+   FROM ( SELECT c.id AS "character",
+            c.name AS charactername,
+            s.id AS stage,
+            s.name AS stagename,
+            ( SELECT count(*) AS count
+                  FROM findcfights(c.id)
+                  WHERE stage = s.id ) AS total,
+            ( SELECT count(*) AS count
+                  FROM findcfights(c.id)
+                  WHERE stage = s.id AND winner = c.id ) AS wins
+           FROM characters c
+            LEFT JOIN stages s ON true) x;
+
 CREATE VIEW playermeta AS
  SELECT x.id,
     x.name,
