@@ -1,4 +1,6 @@
 var pg = require('pg');
+var async = require('async');
+
 var conn = require('./auth').db;
 
 var sql = {};
@@ -44,5 +46,23 @@ sql.insert = function(query, args, callback) {
     callback(err, result.rows[0]);
   });
 };
+
+sql.getMany = function(queryDict, args, callback) {
+  var queries = [];
+  for (var k in queryDict) {
+    queries.unshift(queryDict[k])
+    queryDict[k] = function(cb) {
+      // the arguments in sql.getRows do NOT reference the varibles during the loop
+      //    i.e. if we use queryDict[k], we'll always use the last value of k,
+      //    rather than the value during the loop. Instead, we know that
+      //    async.parallel calls the functions sequentially and deterministically,
+      //    so we can just reference the same array
+      sql.getRows(queries.pop(), args, function(err, rows) {
+        cb(null, rows);
+      });
+    }
+  }
+  async.parallel(queryDict, callback);
+}
 
 module.exports = sql;
