@@ -1,9 +1,22 @@
-// TODO: Store commonly grabbed data to avoid repeated ajax calls
+// stores any fetched data
+var STORED_DATA = {};
+function getData(url, callback) {
+  var field = url.split('api/')[1].replace('/', '_');
+  if (!STORED_DATA[field]) {
+    $.getJSON(url, function(data) {
+      STORED_DATA[field] = data;
+      callback(data)
+    });
+  } else {
+    callback(STORED_DATA[field]);
+  }
+}
 
 var App = React.createClass({
   getInitialState: function() {
     return {
-      view: this.props.view
+      view: this.props.view,
+      id: null
     };
   },
   switchView: function(event) {
@@ -43,29 +56,23 @@ var App = React.createClass({
   }
 });
 
+// GENERAL
 var General = React.createClass({
   getInitialState: function() {
     return {
-      highlightData: {},
       fights: [],
-      stats: {}
+      stats: {},
+      streaks: {}
     };
   },
   componentDidMount: function() {
-    $.getJSON('/api/highlights', function(data) {
-      var stats = React.addons.update(this.state.stats, {
-        topPlayers: {$set: data.topPlayers},
-        topChars: {$set: data.topChars},
-        bottomChars: {$set: data.bottomChars},
-        topStages: {$set: data.topStages},
-      });
+    getData('/api/highlights', function(data) {
       this.setState({
-        highlightData: data,
-        stats: stats
+        stats: data
       });
     }.bind(this));
     // get fights and calculate the longest streaks
-    $.getJSON('/api/fights', function(fights) {
+    getData('/api/fights', function(fights) {
       var players = {};
       var characters = {};
       function initalizeStreak(id, name, type) {
@@ -99,13 +106,13 @@ var General = React.createClass({
       var maxStreak = _.max(players, function(p) {return p.maxStreak/p.total;});
       var maxCharStreak = _.max(characters, function(p) {return p.maxStreak/p.total;});
 
-      var stats = React.addons.update(this.state.stats, {
+      var streaks = React.addons.update(this.state.streaks, {
         maxStreakData: {$set: maxStreak},
         maxCharStreakData: {$set: maxCharStreak}
       });
       this.setState({
         fights: fights,
-        stats: stats
+        streaks: streaks
       });
     }.bind(this));
   },
@@ -116,8 +123,8 @@ var General = React.createClass({
         <h3>top players:</h3>
         <Stats data={this.state.stats.topPlayers} isPlayer={true} />
         <h3>max streak:</h3>
-        <div>{this.state.stats.maxStreakData ? <span>{this.state.stats.maxStreakData.name}: {this.state.stats.maxStreakData.maxStreak}</span> : null}</div>
-        <div>{this.state.stats.maxCharStreakData ? <span>{this.state.stats.maxCharStreakData.name}: {this.state.stats.maxCharStreakData.maxStreak}</span> : null}</div>
+        <div>{this.state.streaks.maxStreakData ? <span>{this.state.streaks.maxStreakData.name}: {this.state.streaks.maxStreakData.maxStreak}</span> : null}</div>
+        <div>{this.state.streaks.maxCharStreakData ? <span>{this.state.streaks.maxCharStreakData.name}: {this.state.streaks.maxCharStreakData.maxStreak}</span> : null}</div>
         <h3>top characters:</h3>
         <Stats data={this.state.stats.topChars} />
         <h3>bottom characters:</h3>
@@ -129,6 +136,7 @@ var General = React.createClass({
   }
 });
 
+// PLAYERS
 var Players = React.createClass({
   getInitialState: function() {
     return {
@@ -136,7 +144,7 @@ var Players = React.createClass({
     };
   },
   componentDidMount: function() {
-    $.getJSON('/api/players', function(data) {
+    getData('/api/players', function(data) {
       this.setState({
         players: data
       });
@@ -154,6 +162,11 @@ var Players = React.createClass({
   }
 });
 
+// var Player = React.createClass({
+
+// });
+
+// CHARACTERS
 var Characters = React.createClass({
   getInitialState: function() {
     return {
@@ -161,7 +174,7 @@ var Characters = React.createClass({
     };
   },
   componentDidMount: function() {
-    $.getJSON('/api/characters', function(data) {
+    getData('/api/characters', function(data) {
       this.setState({
         characters: data
       });
