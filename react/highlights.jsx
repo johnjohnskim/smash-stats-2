@@ -1,4 +1,5 @@
 // stores any fetched data
+// TODO store calculated maxStreak data
 var STORED_DATA = {};
 function getData(url, callback) {
   var field = url.split('api/')[1].replace('/', '_');
@@ -181,6 +182,25 @@ var Players = React.createClass({
   }
 });
 
+function getMaxStreak(id, fights, type) {
+  var streak = 0;
+  var maxStreak = 0;
+  var winnerField = type == 'player' ? 'winner' : 'winnerchar';
+  fights.forEach(function(f) {
+    if (id == f[type+1] || id == f[type+2]) {
+      if (id == f[winnerField]) {
+        streak += 1;
+        if (streak > maxStreak) {
+          maxStreak = streak;
+        }
+      } else {
+        streak = 0;
+      }
+    }
+  });
+  return maxStreak;
+}
+
 var Player = React.createClass({
   getInitialState: function() {
     return {
@@ -194,7 +214,10 @@ var Player = React.createClass({
       });
     }.bind(this));
     getData('/api/fights', function(fights) {
-
+      var maxStreak = getMaxStreak(this.props.data.id, fights, 'player');
+      this.setState({
+        maxStreak: maxStreak
+      });
     }.bind(this));
   },
   render: function() {
@@ -205,10 +228,8 @@ var Player = React.createClass({
         <Stats data={this.state.stats.topPlayers} nameField='player2name' />
         <h3>worst against:</h3>
         <Stats data={this.state.stats.bottomPlayers} nameField='player2name' />
-        {/*<h3>max streak:</h3>
-        <div>{this.state.streaks.maxStreakData ? <span>{this.state.streaks.maxStreakData.name}: {this.state.streaks.maxStreakData.maxStreak}</span> : null}</div>
-        <div>{this.state.streaks.maxCharStreakData ? <span>{this.state.streaks.maxCharStreakData.name}: {this.state.streaks.maxCharStreakData.maxStreak}</span> : null}</div>
-        */}
+        <h3>max streak:</h3>
+        <div>{this.state.maxStreak}</div>
         <h3>best characters:</h3>
         <Stats data={this.state.stats.topChars} nameField='charactername' />
         <h3>worst characters:</h3>
@@ -265,7 +286,10 @@ var Character = React.createClass({
       });
     }.bind(this));
     getData('/api/fights', function(fights) {
-
+      var maxStreak = getMaxStreak(this.props.data.id, fights, 'character');
+      this.setState({
+        maxStreak: maxStreak
+      });
     }.bind(this));
   },
   render: function() {
@@ -276,10 +300,8 @@ var Character = React.createClass({
         <Stats data={this.state.stats.topChars} nameField='character2name' />
         <h3>worst against:</h3>
         <Stats data={this.state.stats.bottomChars} nameField='character2name' />
-        {/*<h3>max streak:</h3>
-        <div>{this.state.streaks.maxStreakData ? <span>{this.state.streaks.maxStreakData.name}: {this.state.streaks.maxStreakData.maxStreak}</span> : null}</div>
-        <div>{this.state.streaks.maxCharStreakData ? <span>{this.state.streaks.maxCharStreakData.name}: {this.state.streaks.maxCharStreakData.maxStreak}</span> : null}</div>
-        */}
+        <h3>max streak:</h3>
+        <div>{this.state.maxStreak}</div>
         <h3>best player with:</h3>
         <Stats data={this.state.stats.topPlayers} nameField='playername' />
         <h3>best stages:</h3>
