@@ -46,9 +46,10 @@ app.use(function(req, res, next) {
 app.use('/', require('./routes/index'));
 app.use('/api', require('./routes/api'));
 app.use('/', require('./routes/login'));
-app.use('/fights', require('./routes/fights'));
-app.use('/tables', require('./routes/tables'));
-app.use('/graphs', require('./routes/graphs'));
+// app.use('/fights', require('./routes/fights'));
+['fights', 'tables', 'graphs', 'highlights'].forEach(function(v) {
+  app.use('/'+v, require('./routes/'+v));
+});
 
 // 404
 app.use(function(req, res, next) {
