@@ -11,7 +11,7 @@ router.get('/:type', function(req, res) {
     }
   });
   if (title) {
-    res.render('tables', { title: title, type: req.params.type });
+    res.render('react-app', { title: title, view: 'tables', type: req.params.type, isTesting: process.env.NODE_ENV == 'development' });
   } else {
     res.render('tables', { title: 'Page Not Found' });
   }
