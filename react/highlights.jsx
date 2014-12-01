@@ -16,13 +16,20 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       view: this.props.view,
-      id: null
+      // can be relevant to anything, so the name should be general
+      data: null
     };
   },
-  switchView: function(event) {
+  switchMainView: function(event) {
     this.setState({
       view: event.target.getAttribute('value')
     })
+  },
+  switchView: function(view, data) {
+    this.setState({
+      view: view,
+      data: data
+    });
   },
   render: function() {
     var view;
@@ -31,16 +38,24 @@ var App = React.createClass({
         view = <General />
         break;
       case 'players':
-        view = <Players />
+        view = <Players switchView={this.switchView} />
         break;
       case 'characters':
-        view = <Characters />
+        view = <Characters switchView={this.switchView} />
         break;
+      case 'player':
+        view = <Player data={this.state.data} />
+        break;
+      case 'character':
+        view = <Character data={this.state.data}/>
+        break;
+      default:
+        view = <General />
     }
     var views = ['general', 'players', 'characters'];
     views = views.map(function(v) {
       return (
-        <li onClick={this.switchView} value={v} key={v}>
+        <li onClick={this.switchMainView} value={v} key={v}>
           {v.substring(0, 1).toUpperCase() + v.substring(1)}
         </li>
       );
@@ -150,21 +165,62 @@ var Players = React.createClass({
       });
     }.bind(this));
   },
+  handleClick: function() {
+    var player = _.find(this.state.players, {id: +event.target.getAttribute('value')});
+    this.props.switchView('player', player);
+  },
   render: function() {
     if (!this.state.players.length) {
       return <div />
     }
     return (
       <ul>
-        {this.state.players.map(function(p) { return <li key={p.id}>{p.name}</li>; })}
+        {this.state.players.map(function(p) { return <li key={p.id} value={p.id} onClick={this.handleClick}>{p.name}</li>; }.bind(this))}
       </ul>
     );
   }
 });
 
-// var Player = React.createClass({
+var Player = React.createClass({
+  getInitialState: function() {
+    return {
+      stats: {}
+    };
+  },
+  componentDidMount: function() {
+    getData('/api/highlights/players/'+this.props.data.id, function(data) {
+      this.setState({
+        stats: data
+      });
+    }.bind(this));
+    getData('/api/fights', function(fights) {
 
-// });
+    }.bind(this));
+  },
+  render: function() {
+    return (
+      <div>
+        <h2>{this.props.data.name}</h2>
+        <h3>best against:</h3>
+        <Stats data={this.state.stats.topPlayers} nameField='player2name' />
+        <h3>worst against:</h3>
+        <Stats data={this.state.stats.bottomPlayers} nameField='player2name' />
+        {/*<h3>max streak:</h3>
+        <div>{this.state.streaks.maxStreakData ? <span>{this.state.streaks.maxStreakData.name}: {this.state.streaks.maxStreakData.maxStreak}</span> : null}</div>
+        <div>{this.state.streaks.maxCharStreakData ? <span>{this.state.streaks.maxCharStreakData.name}: {this.state.streaks.maxCharStreakData.maxStreak}</span> : null}</div>
+        */}
+        <h3>best characters:</h3>
+        <Stats data={this.state.stats.topChars} nameField='charactername' />
+        <h3>worst characters:</h3>
+        <Stats data={this.state.stats.bottomChars} nameField='charactername' />
+        <h3>best stages:</h3>
+        <Stats data={this.state.stats.topStages} nameField='stagename' />
+        <h3>worst stages:</h3>
+        <Stats data={this.state.stats.bottomStages} nameField='stagename' />
+      </div>
+    );
+  }
+});
 
 // CHARACTERS
 var Characters = React.createClass({
@@ -180,14 +236,57 @@ var Characters = React.createClass({
       });
     }.bind(this));
   },
+  handleClick: function() {
+    var character = _.find(this.state.characters, {id: +event.target.getAttribute('value')});
+    this.props.switchView('character', character);
+  },
   render: function() {
     if (!this.state.characters.length) {
       return <div />
     }
     return (
       <ul>
-        {this.state.characters.map(function(c) { return <li key={c.id}>{c.name}</li>; })}
+        {this.state.characters.map(function(c) { return <li key={c.id} value={c.id} onClick={this.handleClick}>{c.name}</li>; }.bind(this))}
       </ul>
+    );
+  }
+});
+
+var Character = React.createClass({
+  getInitialState: function() {
+    return {
+      stats: {}
+    };
+  },
+  componentDidMount: function() {
+    getData('/api/highlights/characters/'+this.props.data.id, function(data) {
+      this.setState({
+        stats: data
+      });
+    }.bind(this));
+    getData('/api/fights', function(fights) {
+
+    }.bind(this));
+  },
+  render: function() {
+    return (
+      <div>
+        <h2>{this.props.data.name}</h2>
+        <h3>best against:</h3>
+        <Stats data={this.state.stats.topChars} nameField='character2name' />
+        <h3>worst against:</h3>
+        <Stats data={this.state.stats.bottomChars} nameField='character2name' />
+        {/*<h3>max streak:</h3>
+        <div>{this.state.streaks.maxStreakData ? <span>{this.state.streaks.maxStreakData.name}: {this.state.streaks.maxStreakData.maxStreak}</span> : null}</div>
+        <div>{this.state.streaks.maxCharStreakData ? <span>{this.state.streaks.maxCharStreakData.name}: {this.state.streaks.maxCharStreakData.maxStreak}</span> : null}</div>
+        */}
+        <h3>best player with:</h3>
+        <Stats data={this.state.stats.topPlayers} nameField='playername' />
+        <h3>best stages:</h3>
+        <Stats data={this.state.stats.topStages} nameField='stagename' />
+        <h3>worst stages:</h3>
+        <Stats data={this.state.stats.bottomStages} nameField='stagename' />
+      </div>
     );
   }
 });
@@ -198,16 +297,18 @@ var Stats = React.createClass({
       return <div />
     }
     var data = this.props.data.map(function(d) {
+      var nameField = this.props.nameField || 'name';
       var extraStat = this.props.isPlayer ? <div>Rating: {d.rating}</div> :
                  this.props.isStage ? <div>Avg rating change: {d.ratingchange}</div> :
                  null;
       var winStat = !this.props.isStage ? <div>Win %: {Math.round(d.winpct * 100)}%</div> : null;
       return (
         <div key={d.id}>
-          <div>Name: {d.name}</div>
+          <div>Name: {d[nameField]}</div>
           {extraStat}
           {winStat}
           <div>Total Matches: {d.total}</div>
+          <hr />
         </div>
       );
     }.bind(this));
