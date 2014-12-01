@@ -185,13 +185,15 @@ var Stats = React.createClass({
       return <div />
     }
     var data = this.props.data.map(function(d) {
-      var stat = this.props.isPlayer ? <div>Rating: {d.rating}</div> :
-        this.props.isStage ? <div>Avg rating change: {d.ratingchange}</div> :
-        <div>Win %: {Math.round(d.winpct * 100)}%</div>;
+      var extraStat = this.props.isPlayer ? <div>Rating: {d.rating}</div> :
+                 this.props.isStage ? <div>Avg rating change: {d.ratingchange}</div> :
+                 null;
+      var winStat = !this.props.isStage ? <div>Win %: {Math.round(d.winpct * 100)}%</div> : null;
       return (
         <div key={d.id}>
           <div>Name: {d.name}</div>
-          {stat}
+          {extraStat}
+          {winStat}
           <div>Total Matches: {d.total}</div>
         </div>
       );
