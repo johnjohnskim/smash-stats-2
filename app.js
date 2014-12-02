@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'build')));
 // libraries
 app.use(express.static(path.join(__dirname, 'bower_components')));
 // react testing
-app.use(express.static(path.join(__dirname, 'react')));
+// app.use(express.static(path.join(__dirname, 'react')));
 
 // authorize requests
 app.use(function(req, res, next) {

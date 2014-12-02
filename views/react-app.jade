@@ -9,7 +9,8 @@ block content
       div(id='app', type=type)
     else
       div#app
-  if isTesting
-    script(type='text/jsx', src='/'+view+'.jsx')
-  else
-    script(src='/js/'+tables+'.js')
+  //- if isTesting
+  //-   script(type='text/jsx', src='/'+view+'.jsx')
+  //- else
+  //-   script(src='/js/'+view+'.min.js')
+  script(src='/js/'+view+'.min.js')

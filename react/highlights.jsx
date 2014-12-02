@@ -359,4 +359,8 @@ function parseUrl(url) {
 
 var url = parseUrl(document.URL);
 
+// window.addEventListener("popstate", function(e) {
+//   debugger;
+// });
+
 React.render(<App view='general' />, document.getElementById('app'));

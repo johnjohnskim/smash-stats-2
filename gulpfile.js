@@ -36,7 +36,7 @@ gulp.task('reactify', function() {
     }))
     .pipe(uglify())
     .pipe(rename(function(path) {
-      path.extname = '.js';
+      path.extname = '.min.js';
     }))
     .pipe(gulp.dest('./build/js'))
 });
@@ -45,8 +45,7 @@ gulp.task('uglify', function() {
   gulp.src('public/js/*.js')
     .pipe(uglify())
     .pipe(rename(function(path) {
-      path.basename += '.min';
-      path.extname = '.js';
+      path.extname = '.min.js';
     }))
     .pipe(gulp.dest('./build/js'))
 });

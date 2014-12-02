@@ -1,5 +1,3 @@
-// var queue = require('queue-async');
-
 var App = React.createClass({
   componentDidMount: function() {
     // wrapper around getJSON for queue
