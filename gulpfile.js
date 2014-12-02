@@ -22,24 +22,28 @@ gulp.task('less', function() {
     .pipe(gulp.dest('./build/css'))
 });
 
-// gulp.task('react', function() {
-//   gulp.src('react/*.jsx')
-//     .pipe(react())
-//     .pipe(gulp.dest('./build/js'))
-// });
-
-gulp.task('reactify', function() {
-  gulp.src('react/*.jsx', {read: false})
-    .pipe(browserify({
-      transform: ['reactify'],
-      extensions: ['.jsx'],
-    }))
+gulp.task('react', function() {
+  gulp.src('react/*.jsx')
+    .pipe(react())
     .pipe(uglify())
     .pipe(rename(function(path) {
       path.extname = '.min.js';
     }))
     .pipe(gulp.dest('./build/js'))
 });
+
+// gulp.task('reactify', function() {
+//   gulp.src('react/*.jsx', {read: false})
+//     .pipe(browserify({
+//       transform: ['reactify'],
+//       extensions: ['.jsx'],
+//     }))
+//     .pipe(uglify())
+//     .pipe(rename(function(path) {
+//       path.extname = '.min.js';
+//     }))
+//     .pipe(gulp.dest('./build/js'))
+// });
 
 gulp.task('uglify', function() {
   gulp.src('public/js/*.js')
@@ -64,11 +68,11 @@ gulp.task('server', function() {
 gulp.task('watch', function() {
   livereload.listen();
   gulp.watch(['./less/*.less'], ['less']);
-  gulp.watch(['./react/*.jsx'], ['reactify']);
+  gulp.watch(['./react/*.jsx'], ['react']);
   // gulp.watch(['./react/*.jsx'], ['react']);
   gulp.watch(['./build/**'])
     .on('change', livereload.changed)
 });
 
-gulp.task('dev', ['watch', 'less', 'reactify', 'uglify', 'server']);
-gulp.task('default', ['less', 'reactify', 'uglify']);
+gulp.task('dev', ['watch', 'less', 'react', 'uglify', 'server']);
+gulp.task('default', ['less', 'react', 'uglify']);
