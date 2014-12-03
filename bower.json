@@ -17,6 +17,7 @@
   "dependencies": {
     "bootstrap": "~3.3.1",
     "d3": "~3.4.13",
+    "jquery": "~2.1.1",
     "lodash": "~2.4.1",
     "queue-async": "git@github.com:mbostock/queue.git#~1.0.7",
     "react": "~0.12.1"

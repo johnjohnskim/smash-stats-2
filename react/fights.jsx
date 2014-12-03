@@ -374,7 +374,7 @@ var Character = React.createClass({
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
       <div className="box" onClick={this.handleClick}>
-        <img src={'/img/chars/select/select_'+select+'.png'} className={classes} />
+        <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} />
       </div>
     );
   }
