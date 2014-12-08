@@ -12,7 +12,6 @@ var App = React.createClass({
     function getImg(name) {
       return name.toLowerCase().replace(/[\.\']/g, '').replace(/\s/g, '_').replace('é', 'e');
     }
-
     queue()
       .defer(getData('/api/players'))
       .defer(getData('/api/characterfights'))
@@ -288,27 +287,40 @@ var App = React.createClass({
       });
     }.bind(this));
   },
+  // BASE RENDER
   render: function() {
     return (
-      <div className="app text-center">
-        <AddPlayer addPlayer={this.addNewPlayer} />
-        <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
-        <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
-        <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
-        <BackButton back={this.removeCharacter} />
-        <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer}
-                   characterData={this.state.characterData} selectedChars={this.state.characters}
-                   winner={this.state.winner} selectWinner={this.selectWinner}
-                   expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
-        <StageSearch searchStage={this.searchStage} />
-        <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
-        <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
-        <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
+      <div className="app text-center row">
+        <div className="fightHeader">Add a Fight</div>
+        <div className="col-md-9 fightChars">
+          <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
+          <BackButton back={this.removeCharacter} />
+        </div>
+        <div className="col-md-3 fightPlayers">
+          <AddPlayer addPlayer={this.addNewPlayer} />
+          <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
+          <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
+        </div>
+        <div className="col-xs-12 fightSummary row">
+          <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData} 
+                     selectedChars={this.state.characters} winner={this.state.winner} selectWinner={this.selectWinner}
+                     expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
+          <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
+        </div>
+        <div className="col-xs-12 fightStages">
+          <StageSearch searchStage={this.searchStage} />
+          <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
+        </div>
+        <div className="col-xs-12 fightSubmit">
+          <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
+        </div>
       </div>
     );
   }
 });
 
+// END BASE, DEFINE COMPONENTS
+// *******************************
 var Player = React.createClass({
   handleClick: function() {
     this.props.queuePlayer(this.props.data.id);
@@ -341,16 +353,21 @@ var PlayerQueue = React.createClass({
       classes += this.props.selectedPlayers.indexOf(p.id) > -1 ? ' selected' : '';
       return (
         <li key={p.id} className={classes} >
-          {p.name} <span className="remove-player" onClick={this.handleClick} value={p.id}>x</span>
+          {p.name} <div className="remove-player pull-right" onClick={this.handleClick} value={p.id}>x</div>
         </li>
       );
     }
     makePlayer = makePlayer.bind(this);
 
     return (
-      <ul className='player-queue'>
-        {players.map(makePlayer)}
-      </ul>
+      <div>
+        <div className='queue-header'>
+          Player Queue
+        </div>
+        <ul className='player-queue'>
+          {players.map(makePlayer)}
+        </ul>
+      </div>
     );
   }
 });
@@ -374,7 +391,7 @@ var Character = React.createClass({
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
       <div className="box" onClick={this.handleClick}>
-        <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} />
+        <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} width="60" />
       </div>
     );
   }
@@ -451,7 +468,7 @@ var Summary = React.createClass({
     }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
-    var classes = "summary " + (this.props.selected ? 'selected' : '');
+    var classes = "summary col-xs-5" + (this.props.selected ? 'selected' : '');
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
         <div>Current rating: {this.props.player ? this.props.player.rating: ''}</div>
@@ -476,6 +493,7 @@ var Summary = React.createClass({
     );
   }
 })
+
 var Summaries = React.createClass({
   render: function() {
     if (!this.props.playerData.length || !this.props.characterData.length) {
@@ -488,7 +506,6 @@ var Summaries = React.createClass({
       return _.find(this.props.characterData, {id: s});
     }.bind(this));
     var summaries = _.zip([1, 2], selectedPlayers, selectedChars, this.props.expectations, this.props.charExpectations, this.props.rating);
-
     function makeSummary(s) {
       var selected = s[1] && s[1].id == this.props.winner;
       return (
@@ -512,7 +529,7 @@ var StageSearch = React.createClass({
   }, 100),
   render: function() {
     return (
-      <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+      <input type="text" className="form-control stageSearch" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
     );
   }
 });
@@ -531,12 +548,12 @@ var Stage = React.createClass({
       'matched': matched,
       'unmatched': !matched
     });
-
     return (
       <img src={'img/stages/'+this.props.data.img} className={classes} onClick={this.handleClick} />
     );
   }
 });
+
 var Stages = React.createClass({
   render: function() {
     if (!this.props.data.length) {
@@ -563,14 +580,14 @@ var Notes = React.createClass({
   },
   render: function() {
     var tags = [
-      ['3 stocked', '#3stock'],
-      ['Mew sighting', '#mew'],
-      ['Bullshit item drops', '#bullshit']
+      ['3 Stock', '#3stock'],
+      ['Mew', '#mew'],
+      ['Bullshit', '#bullshit']
     ];
     tags = tags.map(function(t) {
       var checked = this.props.data.indexOf(t[1]) > -1;
       return (
-        <label key={t[1]}> {t[0]}
+        <label className="checkBoxes" key={t[1]}> {t[0]}
           <input type="checkbox" className="form-control" checked={checked} value={t[1]} onChange={this.handleCheck} />
         </label>
       );
@@ -605,9 +622,9 @@ var AddPlayer = React.createClass({
   },
   render: function() {
     return (
-      <div className="add-player">
-        <input type="text" className="form-control player-input" placeholder="New player..." ref="name" />
-        <button className="btn btn-primary" onClick={this.handleClick}>Add</button>
+      <div className="add-player row">
+        <input type="text" className="player-input col-xs-7 col-xs-offset-1" placeholder="New player..." ref="name" />
+        <button className="btn btn-primary col-xs-3" onClick={this.handleClick}>Add</button>
       </div>
     );
   }
@@ -629,8 +646,8 @@ var AddFight = React.createClass({
       'btn-success': this.props.isFightAdded
     });
     return (
-      <div className="add-fight">
-        <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add')}</button>
+      <div className="add-fight col-xs-2">
+        <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add Fight')}</button>
         {/*<button className="btn btn-danger clear-button" onClick={this.clearFight}>Clear</button>*/}
         <div className="error-msg"><strong>{this.props.errorMsg}</strong></div>
       </div>
