@@ -6,43 +6,115 @@ function getData(url, callback) {
   if (!STORED_DATA[field]) {
     $.getJSON(url, function(data) {
       STORED_DATA[field] = data;
-      callback(data)
+      if (callback) {
+        callback(null, data);
+      }
     });
   } else {
-    callback(STORED_DATA[field]);
+    if (callback) {
+      callback(null, STORED_DATA[field]);
+    }
   }
 }
 
+function cleanName(name) {
+  return name.toLowerCase().replace('.', '').replace(' ', '-');
+}
+
 var App = React.createClass({
+  componentDidMount: function() {
+    function switchFromUrl(url) {
+      if (this.state.prevUrl && (url == this.state.prevUrl || /\/highlights\/?$/.test(url))) {
+        return;
+      }
+      url = url.split('/');
+      var view = null;
+      var data = null;
+      if (url[2] == 'player') {
+        data = _.find(this.state.playerData, function(p) {
+          return cleanName(p.name) == url[3].toLowerCase();
+        });
+        view = data ? 'player' : 'players';
+      }
+      else if (url[2] == 'character') {
+        data = _.find(this.state.characterData, function(c) {
+          return cleanName(c.name) == url[3].toLowerCase();
+        });
+        view = data ? 'character' : 'characters';
+      } else {
+        view = url[2] || 'general';
+      }
+      this.switchView(view, data);
+    }
+    switchFromUrl = switchFromUrl.bind(this);
+
+    function getQueuedData(url) {
+      return function(callback) {
+        getData(url, callback);
+      }
+    }
+    queue()
+      .defer(getQueuedData('/api/players'))
+      .defer(getQueuedData('/api/characters'))
+      .await(function(err, players, characters) {
+        this.setState({
+          playerData: players,
+          characterData: characters
+        });
+        switchFromUrl(location.pathname);
+      }.bind(this));
+
+    window.addEventListener("popstate", function(e) {
+      switchFromUrl(location.pathname);
+    });
+  },
   getInitialState: function() {
     return {
-      view: this.props.view,
-      // can be relevant to anything, so the name should be general
-      data: null
+      view: null,
+      data: null,
+      playerData: [],
+      characterData: [],
+      prevUrl: null
     };
   },
   switchMainView: function(event) {
+    var view = event.target.getAttribute('value');
+    if (this.state.view == view) {
+      return;
+    }
+    history.pushState(null, null, '/highlights/' + view);
     this.setState({
-      view: event.target.getAttribute('value')
+      view: view
     })
   },
   switchView: function(view, data) {
+    var url = '/highlights/' + view
+    if (data) {
+      url += '/' + cleanName(data.name.toLowerCase());
+    }
+    if (location.pathname != url) {
+      history.pushState(null, null, url);
+    }
     this.setState({
       view: view,
-      data: data
+      data: data,
+      prevUrl: url
     });
   },
   render: function() {
+    if (!this.state.view) {
+      return (<div />);
+    }
     var view;
     switch(this.state.view) {
       case 'general':
         view = <General />
         break;
       case 'players':
-        view = <Players switchView={this.switchView} />
+        view = <Players switchView={this.switchView} players={this.state.playerData} />
         break;
       case 'characters':
-        view = <Characters switchView={this.switchView} />
+        view = <Characters switchView={this.switchView} characters={this.state.characterData} />
         break;
       case 'player':
         view = <Player data={this.state.data} />
@@ -82,13 +154,13 @@ var General = React.createClass({
     };
   },
   componentDidMount: function() {
-    getData('/api/highlights', function(data) {
+    getData('/api/highlights', function(err, data) {
       this.setState({
         stats: data
       });
     }.bind(this));
     // get fights and calculate the longest streaks
-    getData('/api/fights', function(fights) {
+    getData('/api/fights', function(err, fights) {
       var players = {};
       var characters = {};
       function initalizeStreak(id, name, type) {
@@ -159,24 +231,24 @@ var Players = React.createClass({
       players: []
     };
   },
-  componentDidMount: function() {
-    getData('/api/players', function(data) {
-      this.setState({
-        players: data
-      });
-    }.bind(this));
-  },
+  // componentDidMount: function() {
+  //   getData('/api/players', function(err, data) {
+  //     this.setState({
+  //       players: data
+  //     });
+  //   }.bind(this));
+  // },
   handleClick: function() {
-    var player = _.find(this.state.players, {id: +event.target.getAttribute('value')});
+    var player = _.find(this.props.players, {id: +event.target.getAttribute('value')});
     this.props.switchView('player', player);
   },
   render: function() {
-    if (!this.state.players.length) {
+    if (!this.props.players.length) {
       return <div />
     }
     return (
       <ul>
-        {this.state.players.map(function(p) { return <li key={p.id} value={p.id} onClick={this.handleClick}>{p.name}</li>; }.bind(this))}
+        {this.props.players.map(function(p) { return <li key={p.id} value={p.id} onClick={this.handleClick}>{p.name}</li>; }.bind(this))}
       </ul>
     );
   }
@@ -208,12 +280,12 @@ var Player = React.createClass({
     };
   },
   componentDidMount: function() {
-    getData('/api/highlights/players/'+this.props.data.id, function(data) {
+    getData('/api/highlights/players/'+this.props.data.id, function(err, data) {
       this.setState({
         stats: data
       });
     }.bind(this));
-    getData('/api/fights', function(fights) {
+    getData('/api/fights', function(err, fights) {
       var maxStreak = getMaxStreak(this.props.data.id, fights, 'player');
       this.setState({
         maxStreak: maxStreak
@@ -250,24 +322,24 @@ var Characters = React.createClass({
       characters: []
     };
   },
-  componentDidMount: function() {
-    getData('/api/characters', function(data) {
-      this.setState({
-        characters: data
-      });
-    }.bind(this));
-  },
+  // componentDidMount: function() {
+  //   getData('/api/characters', function(err, data) {
+  //     this.setState({
+  //       characters: data
+  //     });
+  //   }.bind(this));
+  // },
   handleClick: function() {
-    var character = _.find(this.state.characters, {id: +event.target.getAttribute('value')});
+    var character = _.find(this.props.characters, {id: +event.target.getAttribute('value')});
     this.props.switchView('character', character);
   },
   render: function() {
-    if (!this.state.characters.length) {
+    if (!this.props.characters.length) {
       return <div />
     }
     return (
       <ul>
-        {this.state.characters.map(function(c) { return <li key={c.id} value={c.id} onClick={this.handleClick}>{c.name}</li>; }.bind(this))}
+        {this.props.characters.map(function(c) { return <li key={c.id} value={c.id} onClick={this.handleClick}>{c.name}</li>; }.bind(this))}
       </ul>
     );
   }
@@ -280,12 +352,12 @@ var Character = React.createClass({
     };
   },
   componentDidMount: function() {
-    getData('/api/highlights/characters/'+this.props.data.id, function(data) {
+    getData('/api/highlights/characters/'+this.props.data.id, function(err, data) {
       this.setState({
         stats: data
       });
     }.bind(this));
-    getData('/api/fights', function(fights) {
+    getData('/api/fights', function(err, fights) {
       var maxStreak = getMaxStreak(this.props.data.id, fights, 'character');
       this.setState({
         maxStreak: maxStreak
@@ -318,14 +390,14 @@ var Stats = React.createClass({
     if (!this.props.data || !this.props.data.length) {
       return <div />
     }
-    var data = this.props.data.map(function(d) {
+    var data = this.props.data.map(function(d, i) {
       var nameField = this.props.nameField || 'name';
       var extraStat = this.props.isPlayer ? <div>Rating: {d.rating}</div> :
                  this.props.isStage ? <div>Avg rating change: {d.ratingchange}</div> :
                  null;
       var winStat = !this.props.isStage ? <div>Win %: {Math.round(d.winpct * 100)}%</div> : null;
       return (
-        <div key={d.id}>
+        <div key={i}>
           <div>Name: {d[nameField]}</div>
           {extraStat}
           {winStat}
@@ -343,24 +415,18 @@ var Stats = React.createClass({
 });
 
 // http://www.abeautifulsite.net/parsing-urls-in-javascript/
-function parseUrl(url) {
-  var parser = document.createElement('a');
-  parser.href = url;
-  return {
-    protocol: parser.protocol,
-    host: parser.host,
-    hostname: parser.hostname,
-    port: parser.port,
-    pathname: parser.pathname,
-    search: parser.search,
-    hash: parser.hash
-  };
-}
+// function parseUrl(url) {
+//   var parser = document.createElement('a');
+//   parser.href = url;
+//   return {
+//     protocol: parser.protocol,
+//     host: parser.host,
+//     hostname: parser.hostname,
+//     port: parser.port,
+//     pathname: parser.pathname,
+//     search: parser.search,
+//     hash: parser.hash
+//   };
+// }
 
-var url = parseUrl(document.URL);
-
-// window.addEventListener("popstate", function(e) {
-//   debugger;
-// });
-
-React.render(<App view='general' />, document.getElementById('app'));
+React.render(<App />, document.getElementById('app'));

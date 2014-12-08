@@ -11,7 +11,7 @@ var livereload = process.env.NODE_ENV != 'production' ? require('gulp-livereload
 var nodemon = process.env.NODE_ENV != 'production' ? require('gulp-nodemon') : null;
 
 // compiled files are created in build/
-
+// comment out the uglify() lines to debug (sourcemaps aren't currently working)
 gulp.task('less', function() {
   gulp.src('./less/app.less')
     .pipe(less())
