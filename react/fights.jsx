@@ -467,28 +467,29 @@ var Summary = React.createClass({
       return (Math.round(pct) * 100) + '%';
     }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
-    var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
+    var winnerButton = this.props.player && this.props.char ? <button className="btn btn-default winner" onClick={this.handleClick}>Victory!</button> : null
     var classes = "summary col-xs-5 " + (this.props.selected ? 'selected' : '');
+    var boldStyle = {fontWeight: 'bold'};
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
-        <div>Current rating: {this.props.player ? this.props.player.rating: ''}</div>
-        <div>Character win %: {this.props.char ? convertPct(this.props.char.winpct) : 'n/a'}</div>
-        <div>Chance to win: {this.props.expectation ? convertPct(this.props.expectation) : ''}</div>
-        <div>Chance to win with character: {this.props.charExpectation ? convertPct(this.props.charExpectation) : ''}</div>
-        <div>Rating to gain|lose: {this.props.rating ? this.props.rating.win : ''} | {this.props.rating ? this.props.rating.lose : ''}</div>
+        <div>Current Rating: <span style={boldStyle}>{this.props.player ? this.props.player.rating: ''}</span></div>
+        <div>Character Win %: {this.props.char ? convertPct(this.props.char.winpct) : 'n/a'}</div>
+        <div>Player Chance to Win: {this.props.expectation ? convertPct(this.props.expectation) : ''}</div>
+        <div style={boldStyle}>Total Chance to Win: {this.props.charExpectation ? convertPct(this.props.charExpectation) : ''}</div>
+        <div style={boldStyle}>Rating at Stake: {this.props.rating ? this.props.rating.win : ''} | {this.props.rating ? this.props.rating.lose : ''}</div>
       </div>
     return (
       <div className={classes}>
-        <div>{character}</div>
-        <div>
+        <div className="playerName">
           {/*<select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
             <option value=''>Player</option>
             {this.props.playerData.map(function(p) {return (<option key={p.id} value={p.id}>{p.name}</option>);})}
           </select>*/}
           {this.props.player ? this.props.player.name : ''}
         </div>
+        <div>{character}</div>
+        <div>{stats}</div>
         <div>{winnerButton}</div>
-        {stats}
       </div>
     );
   }
