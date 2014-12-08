@@ -468,7 +468,7 @@ var Summary = React.createClass({
     }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button onClick={this.handleClick}>Winner?</button> : null
-    var classes = "summary col-xs-5" + (this.props.selected ? 'selected' : '');
+    var classes = "summary col-xs-5 " + (this.props.selected ? 'selected' : '');
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
         <div>Current rating: {this.props.player ? this.props.player.rating: ''}</div>
