@@ -291,7 +291,7 @@ var App = React.createClass({
   render: function() {
     return (
       <div className="fight-app">
-        <div className="fight-header">Add a Fight</div>
+        <h1 className="fight-header">Add a Fight</h1>
         <div className="row">
           <div className="nine columns fight-chars">
             <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
@@ -313,7 +313,7 @@ var App = React.createClass({
           <StageSearch searchStage={this.searchStage} />
           <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
         </div>
-        <div className="fight-submit">
+        <div className="fight-notes">
           <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
         </div>
       </div>
@@ -533,7 +533,7 @@ var StageSearch = React.createClass({
   }, 100),
   render: function() {
     return (
-      <input type="text" className="stage-search" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+      <input type="text" className="stage-search u-full-width" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
     );
   }
 });
@@ -593,14 +593,14 @@ var Notes = React.createClass({
       return (
         <label className="check-boxes" key={t[1]}>
           <input type="checkbox" checked={checked} value={t[1]} onChange={this.handleCheck} />
-          <span class="label-body">{t[0]}</span>
+          <span className="label-body">{t[0]}</span>
         </label>
       );
     }.bind(this))
     return (
       <div>
         {tags}
-        <input type="text" placeholder="Notes..."
+        <input type="text" className="u-full-width" placeholder="Notes..."
           ref="notes" value={this.props.data} onChange={this.handleKeypress} />
       </div>
     );
@@ -613,7 +613,7 @@ var BackButton = React.createClass({
   },
   render: function() {
     return (
-      <button className="back-button" onClick={this.back}>Remove</button>
+      <button className="remove-button" onClick={this.back}>Remove</button>
     );
   }
 });
@@ -654,7 +654,7 @@ var AddFight = React.createClass({
       'button-success': this.props.isFightAdded
     });
     return (
-      <div className="add-fight">
+      <div className="fight-submit">
         <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add Fight')}</button>
         {/*<button className="btn btn-danger clear-button" onClick={this.clearFight}>Clear</button>*/}
         <div className="error-msg"><strong>{this.props.errorMsg}</strong></div>
