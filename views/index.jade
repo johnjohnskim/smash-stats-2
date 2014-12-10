@@ -4,21 +4,21 @@ block content
   .main.index
     .logo
       img(src='/img/logo.png')
-    .fightBtn
+    .fight-button
       a(href='/fights')
-        .addFight Add A Fight
+        .add-fight Add A Fight
     ul.menu
       li
         a(href='/highlights/general')
-          .menuItem Highlights
+          .menu-item Highlights
       each p in tablePages
         li
           a(href='/tables/'+p[0])
-            .menuItem #{p[1]}
+            .menu-item #{p[1]}
       li
         a(href='/graphs/players')
-          .menuItem Player Timeline
+          .menu-item Player Timeline
       li
         a(href='/graphs/characters')
-          .menuItem Character Timeline
+          .menu-item Character Timeline
     #app

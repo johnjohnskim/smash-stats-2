@@ -1,3 +1,11 @@
+.fight-header {
+  font-size: 32px;
+  text-align: center;
+  padding: 0px 18px 7px;
+  border-bottom: 1px solid #e9e9e9;
+  margin-bottom: 30px;
+}
+
 .queue-header {
   text-align: center;
   font-size: 14px;
@@ -12,6 +20,11 @@
   }
 }
 
+.player-input {
+  height: 34px;
+  margin-bottom: 20px;
+}
+
 .player-item.selected {
   color: @purple;
 }
@@ -23,6 +36,10 @@
   padding: 0px 5px;
   border: 1px solid #000;
   cursor: pointer;
+}
+
+.fight-chars {
+  border-right: 1px solid #e9e9e9;
 }
 
 .box {
@@ -44,6 +61,7 @@
     opacity: 1;
   }
 }
+
 .character {
   &.selected {
     border: 3px solid #fff;
@@ -60,9 +78,31 @@
   }
 }
 
+.fight-summary {
+  border-top: 1px solid #e9e9e9;
+  padding-top: 30px;
+  margin-top: 30px;
+}
+
 .summary {
   display: inline-block;
   padding: 5px;
+}
+
+.player-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.winner {
+  margin-top: 10px;
+}
+
+.fight-stages {
+  border-top: 1px solid #e9e9e9;
+  padding-top: 30px;
+  margin-top: 30px;
 }
 
 .stage {
@@ -70,7 +110,7 @@
   border: 2px solid #fafafa;
 }
 
-.stageSearch {
+.stage-search {
   margin-bottom: 20px;
 }
 
@@ -87,52 +127,13 @@
   opacity: 0.9;
 }
 
-.fightHeader {
-  font-size: 32px;
-  text-align: center;
-  padding: 0px 18px 7px;
-  border-bottom: 1px solid #e9e9e9;
-  margin-bottom: 30px;
+.check-boxes {
+  margin: 0 20px 20px;
 }
 
-.fightChars {
-  border-right: 1px solid #e9e9e9;
-}
-
-.fightStages {
-  border-top: 1px solid #e9e9e9;
-  padding-top: 30px;
-  margin-top: 30px;
-}
-
-.fightSummary {
-  border-top: 1px solid #e9e9e9;
-  padding-top: 30px;
-  margin-top: 30px;
-}
-
-.fightSubmit {
+.fight-submit {
   border-top: 1px solid #e9e9e9;
   padding-top: 30px;
   margin-top: 30px;
   padding-bottom: 60px;
-}
-
-.player-input {
-  height: 34px;
-  margin-bottom: 20px;
-}
-
-.checkBoxes {
-  margin: 0 20px 20px;
-}
-
-.playerName {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.winner {
-  margin-top: 10px;
 }

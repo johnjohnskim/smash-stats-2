@@ -291,27 +291,27 @@ var App = React.createClass({
   render: function() {
     return (
       <div className="app text-center row">
-        <div className="fightHeader">Add a Fight</div>
-        <div className="col-md-9 fightChars">
+        <div className="fight-header">Add a Fight</div>
+        <div className="col-md-9 fight-chars">
           <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
           <BackButton back={this.removeCharacter} />
         </div>
-        <div className="col-md-3 fightPlayers">
+        <div className="col-md-3 fight-players">
           <AddPlayer addPlayer={this.addNewPlayer} />
           <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
           <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
         </div>
-        <div className="col-xs-12 fightSummary row">
-          <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData} 
+        <div className="col-xs-12 fight-summary row">
+          <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData}
                      selectedChars={this.state.characters} winner={this.state.winner} selectWinner={this.selectWinner}
                      expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
           <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
         </div>
-        <div className="col-xs-12 fightStages">
+        <div className="col-xs-12 fight-stages">
           <StageSearch searchStage={this.searchStage} />
           <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
         </div>
-        <div className="col-xs-12 fightSubmit">
+        <div className="col-xs-12 fight-submit">
           <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
         </div>
       </div>
@@ -480,7 +480,7 @@ var Summary = React.createClass({
       </div>
     return (
       <div className={classes}>
-        <div className="playerName">
+        <div className="player-name">
           {/*<select ref='playerSelect' value={this.props.player ? this.props.player.id : ''} onChange={this.handleSelect}>
             <option value=''>Player</option>
             {this.props.playerData.map(function(p) {return (<option key={p.id} value={p.id}>{p.name}</option>);})}
@@ -530,7 +530,7 @@ var StageSearch = React.createClass({
   }, 100),
   render: function() {
     return (
-      <input type="text" className="form-control stageSearch" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+      <input type="text" className="form-control stage-search" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
     );
   }
 });
@@ -588,7 +588,7 @@ var Notes = React.createClass({
     tags = tags.map(function(t) {
       var checked = this.props.data.indexOf(t[1]) > -1;
       return (
-        <label className="checkBoxes" key={t[1]}> {t[0]}
+        <label className="check-boxes" key={t[1]}> {t[0]}
           <input type="checkbox" className="form-control" checked={checked} value={t[1]} onChange={this.handleCheck} />
         </label>
       );
