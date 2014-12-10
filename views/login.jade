@@ -4,22 +4,20 @@ block content
   div.container
     h1= title
     form(action='/login', method='post')
-      div(class='input-group')
+      div
         //- label Username
         input(
           type='text'
           name='username'
-          class='form-control'
           placeholder='Username'
         )
         //- label Password
         input(
           type='password'
           name='password'
-          class='form-control'
           placeholder='Password'
         )
       #error.error
       div
-        input(id='submit', type='button', value='Login', class='btn btn-default')
+        input(id='submit', type='button', value='Login', class='button-primary')
   script(src='/js/login.min.js')

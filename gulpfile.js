@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var path = require('path');
+var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var less = require('gulp-less');
 var minifyCss = require('gulp-minify-css');
@@ -13,12 +14,13 @@ var nodemon = process.env.NODE_ENV != 'production' ? require('gulp-nodemon') : n
 // compiled files are created in build/
 // comment out the uglify() lines to debug (sourcemaps aren't currently working)
 gulp.task('less', function() {
-  gulp.src('./less/app.less')
+  gulp.src(['./bower_components/skeleton/css/normalize.css', './bower_components/skeleton/css/skeleton.css', './less/app.less'])
     .pipe(less())
+    .pipe(concat('app.min.css'))
     .pipe(minifyCss())
-    .pipe(rename(function(path) {
-      path.extname = '.min.css';
-    }))
+    // .pipe(rename(function(path) {
+    //   path.extname = '.min.css';
+    // }))
     .pipe(gulp.dest('./build/css'))
 });
 

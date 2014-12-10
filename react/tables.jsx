@@ -97,12 +97,12 @@ var Table = React.createClass({
 
     return (
       <div>
-        <div className="clearfix">
-          <div className="pull-right">
-            <input type="text" className="form-control" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+        <div>
+          <div className="u-pull-right">
+            <input type="text" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
           </div>
         </div>
-        <table className="table table-hover main-table">
+        <table className="main-table u-full-width">
           <thead>
             <tr>
               { this.props.headers.map(makeHeader.bind(this)) }
@@ -122,13 +122,12 @@ var Header = React.createClass({
     this.props.sort(this.props.attr);
   },
   render: function() {
-    var classes = this.props.sortBy == this.props.attr ? (this.props.order == '+' ? 'glyphicon-chevron-up' :
-                                                                                   'glyphicon-chevron-down') :
-                  '';
+    var arrow = this.props.sortBy == this.props.attr ? (this.props.order == '+' ? '<' : '>') :
+                '';
     return (
       <th onClick={this.handleClick}>
         {this.props.name}
-        &nbsp;&nbsp;<span className={'glyphicon ' + classes} />
+        &nbsp;&nbsp;<span>{arrow}</span>
       </th>
     );
   }
