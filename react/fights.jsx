@@ -464,7 +464,7 @@ var Summary = React.createClass({
   },
   render: function() {
     function convertPct(pct) {
-      return (Math.round(pct) * 100) + '%';
+      return (Math.round(pct * 100)) + '%';
     }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button className="btn btn-default winner" onClick={this.handleClick}>Victory!</button> : null
