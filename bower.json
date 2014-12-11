@@ -21,6 +21,6 @@
     "lodash": "~2.4.1",
     "queue-async": "git@github.com:mbostock/queue.git#~1.0.7",
     "react": "~0.12.1",
-    "Skeleton": "git@github.com:dhg/Skeleton.git"
+    "skeleton": "*"
   }
 }

@@ -290,28 +290,34 @@ var App = React.createClass({
   // BASE RENDER
   render: function() {
     return (
-      <div className="app text-center row">
-        <div className="fight-header">Add a Fight</div>
-        <div className="col-md-9 fight-chars">
-          <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
-          <BackButton back={this.removeCharacter} />
+      <div className="fight-app">
+        <h1 className="fight-header">Add a Fight</h1>
+        <div className="row">
+          <div className="fight-chars nine columns">
+            <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
+            <BackButton back={this.removeCharacter} />
+          </div>
+          <div className="fight-players three columns">
+            <AddPlayer addPlayer={this.addNewPlayer} />
+            <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
+            <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
+          </div>
         </div>
-        <div className="col-md-3 fight-players">
-          <AddPlayer addPlayer={this.addNewPlayer} />
-          <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
-          <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
+        <div className="fight-summary row">
+          <div className="eight columns">
+            <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData}
+                       selectedChars={this.state.characters} winner={this.state.winner} selectWinner={this.selectWinner}
+                       expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
+          </div>
+          <div className="four columns">
+            <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
+          </div>
         </div>
-        <div className="col-xs-12 fight-summary row">
-          <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData}
-                     selectedChars={this.state.characters} winner={this.state.winner} selectWinner={this.selectWinner}
-                     expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
-          <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
-        </div>
-        <div className="col-xs-12 fight-stages">
+        <div className="fight-stages">
           <StageSearch searchStage={this.searchStage} />
           <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
         </div>
-        <div className="col-xs-12 fight-submit">
+        <div className="fight-notes">
           <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
         </div>
       </div>
@@ -321,13 +327,14 @@ var App = React.createClass({
 
 // END BASE, DEFINE COMPONENTS
 // *******************************
+
 var Player = React.createClass({
   handleClick: function() {
     this.props.queuePlayer(this.props.data.id);
   },
   render: function() {
     return (
-      <button className="player btn btn-default" onClick={this.handleClick} disabled={this.props.selected}>{this.props.data.name}</button>
+      <button className="player" onClick={this.handleClick} disabled={this.props.selected}>{this.props.data.name}</button>
     );
   }
 });
@@ -353,7 +360,7 @@ var PlayerQueue = React.createClass({
       classes += this.props.selectedPlayers.indexOf(p.id) > -1 ? ' selected' : '';
       return (
         <li key={p.id} className={classes} >
-          {p.name} <div className="remove-player pull-right" onClick={this.handleClick} value={p.id}>x</div>
+          {p.name} <div className="remove-player u-pull-right" onClick={this.handleClick} value={p.id}>x</div>
         </li>
       );
     }
@@ -390,9 +397,7 @@ var Character = React.createClass({
     });
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
-      <div className="box" onClick={this.handleClick}>
-        <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} width="60" />
-      </div>
+      <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} onClick={this.handleClick}/>
     );
   }
 });
@@ -406,7 +411,7 @@ var Characters = React.createClass({
       [23, 22, 35, 1, 49, 40, 2, 47, 7, 6, 30, 19],
       [18, 50, 42, 12, 45, 41, 51, 37, 34, 24, 14, 39, 9],
       [17, 16, 26, 11, 10, 36, 4, 20, 15, 13, 38, 31, 3],
-      [46, 32, 48, 43, 8, 5, 21, 33, 25, 44],
+      [46, 32, 48, 43, 8, 5, 21, 33, 25, 44]
     ];
     var pos = 1;
     // replace ids with character object and attach select position
@@ -467,8 +472,8 @@ var Summary = React.createClass({
       return (Math.round(pct * 100)) + '%';
     }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
-    var winnerButton = this.props.player && this.props.char ? <button className="btn btn-default winner" onClick={this.handleClick}>Victory!</button> : null
-    var classes = "summary col-xs-5 " + (this.props.selected ? 'selected' : '');
+    var winnerButton = this.props.player && this.props.char ? <button className="winner-button" onClick={this.handleClick}>Victory!</button> : null
+    var classes = "summary " + (this.props.selected ? 'selected' : '');
     var boldStyle = {fontWeight: 'bold'};
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
@@ -510,14 +515,16 @@ var Summaries = React.createClass({
     function makeSummary(s) {
       var selected = s[1] && s[1].id == this.props.winner;
       return (
-        <Summary key={s[0]} id={s[0]} playerData={this.props.playerData} player={s[1]} char={s[2]}
-          selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner}
-          expectation={s[3]} charExpectation={s[4]} rating={s[5]} />
+        <div className="one-half column">
+          <Summary key={s[0]} id={s[0]} playerData={this.props.playerData} player={s[1]} char={s[2]}
+            selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner}
+            expectation={s[3]} charExpectation={s[4]} rating={s[5]} />
+        </div>
       );
     }
     makeSummary = makeSummary.bind(this);
     return (
-      <div className="summaries">
+      <div className="summaries row">
         { summaries.map(makeSummary.bind(this)) }
       </div>
     );
@@ -530,7 +537,7 @@ var StageSearch = React.createClass({
   }, 100),
   render: function() {
     return (
-      <input type="text" className="form-control stage-search" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+      <input type="text" className="stage-search u-full-width" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
     );
   }
 });
@@ -588,15 +595,16 @@ var Notes = React.createClass({
     tags = tags.map(function(t) {
       var checked = this.props.data.indexOf(t[1]) > -1;
       return (
-        <label className="check-boxes" key={t[1]}> {t[0]}
-          <input type="checkbox" className="form-control" checked={checked} value={t[1]} onChange={this.handleCheck} />
+        <label className="check-boxes" key={t[1]}>
+          <input type="checkbox" checked={checked} value={t[1]} onChange={this.handleCheck} />
+          <span className="label-body">{t[0]}</span>
         </label>
       );
     }.bind(this))
     return (
       <div>
         {tags}
-        <input type="text" className="form-control" placeholder="Notes..."
+        <input type="text" className="u-full-width" placeholder="Notes..."
           ref="notes" value={this.props.data} onChange={this.handleKeypress} />
       </div>
     );
@@ -609,7 +617,7 @@ var BackButton = React.createClass({
   },
   render: function() {
     return (
-      <button className="btn btn-default back" onClick={this.back}>Remove</button>
+      <button className="remove-button" onClick={this.back}>Remove</button>
     );
   }
 });
@@ -624,8 +632,12 @@ var AddPlayer = React.createClass({
   render: function() {
     return (
       <div className="add-player row">
-        <input type="text" className="player-input col-xs-7 col-xs-offset-1" placeholder="New player..." ref="name" />
-        <button className="btn btn-primary col-xs-3" onClick={this.handleClick}>Add</button>
+        <div className="eight columns">
+          <input type="text" className="player-input u-full-width" placeholder="New player..." ref="name" />
+        </div>
+        <div className="four columns">
+          <button className="button-primary u-full-width" onClick={this.handleClick}>Add</button>
+        </div>
       </div>
     );
   }
@@ -641,13 +653,12 @@ var AddFight = React.createClass({
   render: function() {
     var cx = React.addons.classSet;
     var classes = cx({
-      'btn' : true,
       'add-button': true,
-      'btn-primary': !this.props.isFightAdded,
-      'btn-success': this.props.isFightAdded
+      'button-primary': !this.props.isFightAdded,
+      'button-success': this.props.isFightAdded
     });
     return (
-      <div className="add-fight col-xs-2">
+      <div className="fight-submit">
         <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add Fight')}</button>
         {/*<button className="btn btn-danger clear-button" onClick={this.clearFight}>Clear</button>*/}
         <div className="error-msg"><strong>{this.props.errorMsg}</strong></div>
