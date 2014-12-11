@@ -293,21 +293,25 @@ var App = React.createClass({
       <div className="fight-app">
         <h1 className="fight-header">Add a Fight</h1>
         <div className="row">
-          <div className="nine columns fight-chars">
+          <div className="fight-chars nine columns">
             <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
             <BackButton back={this.removeCharacter} />
           </div>
-          <div className="three columns fight-players">
+          <div className="fight-players three columns">
             <AddPlayer addPlayer={this.addNewPlayer} />
             <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
             <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
           </div>
         </div>
-        <div className="fight-summary">
-          <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData}
-                     selectedChars={this.state.characters} winner={this.state.winner} selectWinner={this.selectWinner}
-                     expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
-          <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
+        <div className="fight-summary row">
+          <div className="eight columns">
+            <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData}
+                       selectedChars={this.state.characters} winner={this.state.winner} selectWinner={this.selectWinner}
+                       expectations={this.state.expectations} charExpectations={this.state.charExpectations} rating={this.state.rating} />
+          </div>
+          <div className="four columns">
+            <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
+          </div>
         </div>
         <div className="fight-stages">
           <StageSearch searchStage={this.searchStage} />
@@ -393,9 +397,7 @@ var Character = React.createClass({
     });
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
-      <div className="box" onClick={this.handleClick}>
-        <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} width="60" />
-      </div>
+      <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} onClick={this.handleClick}/>
     );
   }
 });
@@ -409,7 +411,7 @@ var Characters = React.createClass({
       [23, 22, 35, 1, 49, 40, 2, 47, 7, 6, 30, 19],
       [18, 50, 42, 12, 45, 41, 51, 37, 34, 24, 14, 39, 9],
       [17, 16, 26, 11, 10, 36, 4, 20, 15, 13, 38, 31, 3],
-      [46, 32, 48, 43, 8, 5, 21, 33, 25, 44],
+      [46, 32, 48, 43, 8, 5, 21, 33, 25, 44]
     ];
     var pos = 1;
     // replace ids with character object and attach select position
@@ -467,11 +469,11 @@ var Summary = React.createClass({
   },
   render: function() {
     function convertPct(pct) {
-      return (Math.round(pct) * 100) + '%';
+      return (Math.round(pct * 100)) + '%';
     }
     var character = this.props.char ? <CharacterSummary data={this.props.char} /> : null
     var winnerButton = this.props.player && this.props.char ? <button className="winner-button" onClick={this.handleClick}>Victory!</button> : null
-    var classes = "summary" + (this.props.selected ? 'selected' : '');
+    var classes = "summary " + (this.props.selected ? 'selected' : '');
     var boldStyle = {fontWeight: 'bold'};
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
@@ -513,14 +515,16 @@ var Summaries = React.createClass({
     function makeSummary(s) {
       var selected = s[1] && s[1].id == this.props.winner;
       return (
-        <Summary key={s[0]} id={s[0]} playerData={this.props.playerData} player={s[1]} char={s[2]}
-          selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner}
-          expectation={s[3]} charExpectation={s[4]} rating={s[5]} />
+        <div className="one-half column">
+          <Summary key={s[0]} id={s[0]} playerData={this.props.playerData} player={s[1]} char={s[2]}
+            selected={selected} selectPlayer={this.props.selectPlayer} selectWinner={this.props.selectWinner}
+            expectation={s[3]} charExpectation={s[4]} rating={s[5]} />
+        </div>
       );
     }
     makeSummary = makeSummary.bind(this);
     return (
-      <div className="summaries">
+      <div className="summaries row">
         { summaries.map(makeSummary.bind(this)) }
       </div>
     );

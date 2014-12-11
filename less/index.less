@@ -9,6 +9,26 @@
   margin: 2rem 0 4rem 0;
 }
 
+.fight-button {
+  width: 30%;
+  margin-left: 35%;
+  a {
+    text-decoration: none;
+  }
+}
+
+.add-fight {
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  color: #F0F0F0;
+  background-color: darken(@purple, 30%);
+  border: 1px solid darken(@purple, 20%);
+  &:hover {
+    background-color: darken(@purple, 40%);
+  }
+  padding: 1rem;
+}
+
 .menu {
   list-style: none;
   margin-top: 4rem;
@@ -30,24 +50,4 @@
   &:hover {
     background-color: lighten(@purple, 22%);
   }
-}
-
-.fight-button {
-  width: 30%;
-  margin-left: 35%;
-  a {
-    text-decoration: none;
-  }
-}
-
-.add-fight {
-  text-transform: uppercase;
-  font-size: 1.6rem;
-  color: #F0F0F0;
-  background-color: darken(@purple, 30%);
-  border: 1px solid darken(@purple, 20%);
-  &:hover {
-    background-color: darken(@purple, 40%);
-  }
-  padding: 1rem 0.7rem;
 }
