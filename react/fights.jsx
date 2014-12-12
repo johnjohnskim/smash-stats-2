@@ -261,7 +261,7 @@ var App = React.createClass({
       this.setState({
         isFightAdded: false
       });
-    }.bind(this), 3000);
+    }.bind(this), 4000);
   },
   clearFight: function() {
     this.setState({
@@ -292,6 +292,7 @@ var App = React.createClass({
     return (
       <div className="fight-app">
         <h1 className="fight-header">Add a Fight</h1>
+        <hr />
         <div className="row">
           <div className="fight-chars nine columns">
             <Characters data={this.state.characterData} selected={this.state.characters} addCharacter={this.addCharacter} />
@@ -303,6 +304,7 @@ var App = React.createClass({
             <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
           </div>
         </div>
+        <hr />
         <div className="fight-summary row">
           <div className="eight columns">
             <Summaries playerData={this.state.playerData} selectedPlayers={this.state.players} selectPlayer={this.selectPlayer} characterData={this.state.characterData}
@@ -313,10 +315,12 @@ var App = React.createClass({
             <AddFight addFight={this.addFight} clearFight={this.clearFight} errorMsg={this.state.errorMsg} isFightAdded={this.state.isFightAdded} />
           </div>
         </div>
+        <hr />
         <div className="fight-stages">
           <StageSearch searchStage={this.searchStage} />
           <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
         </div>
+        <hr />
         <div className="fight-notes">
           <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
         </div>
