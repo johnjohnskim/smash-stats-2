@@ -122,7 +122,7 @@ var Header = React.createClass({
     this.props.sort(this.props.attr);
   },
   render: function() {
-    var arrow = this.props.sortBy == this.props.attr ? (this.props.order == '+' ? '<' : '>') :
+    var arrow = this.props.sortBy == this.props.attr ? (this.props.order == '+' ? '▲' : '▼') :
                 '';
     return (
       <th onClick={this.handleClick}>

@@ -333,8 +333,10 @@ var Player = React.createClass({
     this.props.queuePlayer(this.props.data.id);
   },
   render: function() {
+    var disabled = this.props.selected ? ' disabled' : '';
+    var classes = 'player' + disabled;
     return (
-      <button className="player" onClick={this.handleClick} disabled={this.props.selected}>{this.props.data.name}</button>
+      <button className={classes} onClick={this.handleClick} disabled={this.props.selected}>{this.props.data.name}</button>
     );
   }
 });
@@ -360,7 +362,7 @@ var PlayerQueue = React.createClass({
       classes += this.props.selectedPlayers.indexOf(p.id) > -1 ? ' selected' : '';
       return (
         <li key={p.id} className={classes} >
-          {p.name} <div className="remove-player u-pull-right" onClick={this.handleClick} value={p.id}>x</div>
+          {p.name} <div className="remove-player u-pull-right" onClick={this.handleClick} value={p.id}></div>
         </li>
       );
     }
@@ -549,12 +551,12 @@ var Stage = React.createClass({
   render: function() {
     var cx = React.addons.classSet;
     var filter = this.props.filter.toLowerCase();
-    var matched = !filter || (filter && this.props.data.name.toLowerCase().indexOf(filter) > -1);
+    var matched = filter && this.props.data.name.toLowerCase().indexOf(filter) > -1;
     var classes = cx({
       'stage' : true,
       'selected': this.props.selected,
-      'matched': matched,
-      'unmatched': !matched
+      'matched': matched && filter,
+      'unmatched': !matched && filter
     });
     return (
       <img src={'img/stages/'+this.props.data.img} className={classes} onClick={this.handleClick} />
