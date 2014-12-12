@@ -1,3 +1,5 @@
+@base-purple: #C45AEC;
+
 .index {
   text-align: center;
   margin-left: 20%;
@@ -21,10 +23,10 @@
   text-transform: uppercase;
   font-size: 1.6rem;
   color: #F0F0F0;
-  background-color: darken(@purple, 30%);
-  border: 1px solid darken(@purple, 20%);
+  background-color: darken(@base-purple, 30%);
+  border: 1px solid darken(@base-purple, 20%);
   &:hover {
-    background-color: darken(@purple, 40%);
+    background-color: darken(@base-purple, 40%);
   }
   padding: 1rem;
 }
@@ -44,10 +46,10 @@
 
 .menu-item {
   padding: 1rem 0.7rem;
-  border: 1px solid darken(@purple, 40%);
-  color: darken(@purple, 40%);
+  border: 1px solid darken(@base-purple, 40%);
+  color: darken(@base-purple, 40%);
   margin: 0.3rem;
   &:hover {
-    background-color: lighten(@purple, 22%);
+    background-color: lighten(@base-purple, 22%);
   }
 }
