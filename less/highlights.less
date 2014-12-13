@@ -1,0 +1,62 @@
+.highlights {
+  padding-bottom: 3rem;
+}
+
+.main-menu {
+  list-style-type: none;
+  li {
+    display: inline-block;
+    background-color: @light-gray;
+    margin: 0 1rem;
+    padding: 1rem 2rem;
+    &:hover {
+      cursor: pointer;
+      background-color: darken(@light-gray, 7%);
+    }
+    &.active {
+      background-color: #5C97BF;
+      color: @white;
+      font-weight: bold;
+      &:hover {
+        background-color: darken(#5C97BF, 7%);
+      }
+    }
+  }
+}
+
+.highlights h2 {
+  text-transform: uppercase;
+  font-size: 3.0rem;
+}
+
+.highlights h3 {
+  text-transform: uppercase;
+  text-transform: uppercase;
+  font-size: 2.0rem;
+}
+
+.stats {
+  display: inline-block;
+  padding-right: 6rem;
+}
+
+.highlights-list {
+  // margin-left: 2rem;
+  list-style-type: none;
+  li {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.15rem;
+    background-color: #34495E;
+    color: @white;
+    display: inline-block;
+    width: 20rem;
+    padding: 1rem;
+    margin: 1rem;
+    &:hover {
+      cursor: pointer;
+      background-color: darken(#34495E, 7%);
+    }
+  }
+}
