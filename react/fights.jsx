@@ -212,6 +212,11 @@ var App = React.createClass({
       this.setState({
         errorMsg: msg
       });
+      setTimeout(function() {
+        this.setState({
+          errorMsg: ''
+        });
+      }.bind(this), 4000);
       return;
     }
     // add the fight
@@ -660,8 +665,9 @@ var AddFight = React.createClass({
     var cx = React.addons.classSet;
     var classes = cx({
       'add-button': true,
-      'button-primary': !this.props.isFightAdded,
-      'button-success': this.props.isFightAdded
+      'button-primary': !this.props.isFightAdded && !this.props.errorMsg,
+      'button-success': this.props.isFightAdded,
+      'button-danger': this.props.errorMsg
     });
     return (
       <div className="fight-submit">
