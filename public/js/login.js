@@ -1,10 +1,14 @@
 $(document).ready(function() {
+  var errorMsg = '';
+  var $error = $('#error');
+
   function login() {
     $.post('/login', {username: $("input[name='username']").val(), password: $("input[name='password']").val()}, function(d) {
       if (d == 'ok') {
         window.location.replace('/');
       } else {
-        $('#error').text(d);
+        errorMsg = d;
+        $error.text(d);
       }
     });
   }
@@ -12,6 +16,9 @@ $(document).ready(function() {
   $('input').keypress(function(e) {
     if (e.keyCode == 13) {
       login();
+    } else if (errorMsg) {
+      errorMsg = '';
+      $error.text('');
     }
   });
 });

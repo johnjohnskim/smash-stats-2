@@ -2,7 +2,7 @@ extends layout
 
 block content
   div.container
-    h1= title
+    h1(style='margin-top: 3rem;')= title
     form(action='/login', method='post')
       div
         //- label Username
@@ -10,6 +10,7 @@ block content
           type='text'
           name='username'
           placeholder='Username'
+          style='margin-right: 1rem;'
         )
         //- label Password
         input(
@@ -17,7 +18,7 @@ block content
           name='password'
           placeholder='Password'
         )
-      #error.error
+        #error.login-error
       div
         input(id='submit', type='button', value='Login', class='button-primary')
   script(src='/js/login.min.js')

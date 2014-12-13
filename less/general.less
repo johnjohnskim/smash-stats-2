@@ -24,7 +24,12 @@ button.disabled {
   &:hover, &:focus {
     background-color: darken(@color, 4%);
     color: @white;
+    border-color: darken(@color, 8%);
   }
+}
+
+button.button-primary {
+  .button-maker(@purple);
 }
 .button-success {
   .button-maker(@green);

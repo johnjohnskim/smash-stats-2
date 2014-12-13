@@ -1,0 +1,41 @@
+// styles for individual pages
+// if the less becomes too large for a page, move it into a new file
+
+
+// LOGIN
+.login-error {
+  font-weight: bold;
+  color: lighten(@red, 5%);
+  display: inline-block;
+  margin-left: 1rem;
+}
+
+
+// TABLES
+.main-table {
+  margin-top: 1.5rem;
+  th:hover {
+    cursor: pointer;
+  }
+  tbody tr:hover {
+    background-color: #D2D7D3;
+  }
+}
+
+
+// GRAPHS
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1.5px;
+}
