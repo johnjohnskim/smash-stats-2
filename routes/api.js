@@ -214,11 +214,11 @@ router.route('/highlights/characters/:id')
       topStages: "SELECT * FROM charstagewins w \
         WHERE w.character=$1 AND total>0 \
         ORDER BY winpct DESC, total DESC \
-        LIMIT 3",
+        LIMIT 2",
       bottomStages: "SELECT * FROM charstagewins w \
         WHERE w.character=$1 AND total>0 \
         ORDER BY winpct, total DESC \
-        LIMIT 3"
+        LIMIT 2"
     };
     sql.getMany(queries, [req.params.id], function(err, results) {
       res.json(results);
