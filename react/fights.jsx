@@ -54,7 +54,8 @@ var App = React.createClass({
       errorMsg: '',
       isFightAdded: false,
       characterFilter: '',
-      stageFilter: ''
+      stageFilter: '',
+      oldFights: []
     };
   },
   selectPlayer: function(pid, pos) {
@@ -226,7 +227,7 @@ var App = React.createClass({
     var loser = player1 == winner ? player2 : player1;
     var rating1 = player1 == winner ? this.state.rating[0].win : this.state.rating[0].lose;
     var rating2 = player2 == winner ? this.state.rating[1].win : this.state.rating[1].lose;
-    $.post('/api/fights', {
+    var fightData = {
       player1: player1,
       player2: player2,
       character1: this.state.characters[0],
@@ -236,7 +237,8 @@ var App = React.createClass({
       rating1: rating1,
       rating2: rating2,
       notes: this.state.notes
-    });
+    };
+    $.post('/api/fights', fightData);
     // update player ratings
     var playerData = _.cloneDeep(this.state.playerData);
     player1 = _.find(playerData, {id: player1});
@@ -253,6 +255,13 @@ var App = React.createClass({
       data: {'rating': player2.rating},
       type: 'put'
     });
+    // convert fight data to use names
+    fightData.player1 = player1.name;
+    fightData.player2 = player2.name;
+    fightData.character1 = _.find(this.state.characterData, {id: fightData.character1}).name;
+    fightData.character2 = _.find(this.state.characterData, {id: fightData.character2}).name;
+    fightData.stage = _.find(this.state.stageData, {id: fightData.stage}).name;
+    fightData.winner = player1.id == fightData.winner ? player1.name : player2.name;
     // reset the state vars
     this.clearFight();
     var playerQueue = [winner].concat(this.state.playerQueue.slice(2)).concat(loser);
@@ -260,7 +269,8 @@ var App = React.createClass({
       isFightAdded: true,
       players: [winner, playerQueue[1]],
       playerQueue: playerQueue,
-      playerData: playerData
+      playerData: playerData,
+      oldFights: [fightData].concat(this.state.oldFights)
     });
     setTimeout(function() {
       this.setState({
@@ -328,6 +338,10 @@ var App = React.createClass({
         <hr />
         <div className="fight-notes">
           <Notes data={this.state.notes} addNotes={this.addNotes} addNotesTag={this.addNotesTag} />
+        </div>
+        <hr />
+        <div className="fights-recent">
+          <RecentFights oldFights={this.state.oldFights} />
         </div>
       </div>
     );
@@ -674,6 +688,36 @@ var AddFight = React.createClass({
         <button className={classes} onClick={this.addFight}>{(this.props.isFightAdded ? 'Added!!' : 'Add Fight')}</button>
         {/*<button className="btn btn-danger clear-button" onClick={this.clearFight}>Clear</button>*/}
         <div className="error-msg"><strong>{this.props.errorMsg}</strong></div>
+      </div>
+    );
+  }
+});
+
+var RecentFights = React.createClass({
+  render: function() {
+    var headers = ['Player 1', 'Character 1', 'Player 2', 'Character 2', 'Winner', 'Stage', 'Notes'].map(function(h) {
+      return (
+        <th>{h}</th>
+      );
+    });
+    var attrs = ['player1', 'character1', 'player2', 'character2', 'winner', 'stage', 'notes'];
+    var data = this.props.oldFights.map(function(f) {
+      var tds = attrs.map(function(a) {
+        return ( <td>{f[a]}</td> );
+      });
+      return ( <tr>{tds}</tr> );
+    });
+    return (
+      <div className='recent'>
+        <h2>Recent Fights</h2>
+        <table>
+          <thead>
+            <tr>{headers}</tr>
+          </thead>
+          <tbody>
+            {data}
+          </tbody>
+        </table>
       </div>
     );
   }
