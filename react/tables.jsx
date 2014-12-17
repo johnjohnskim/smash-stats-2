@@ -143,7 +143,8 @@ var tableMeta = {
       ['player1name', 'Player 1'],
       ['character1name', 'Character 1'],
       ['player2name', 'Player 2'],
-      ['character2name', 'Character 2']
+      ['character2name', 'Character 2'],
+      ['notes', 'Notes']
     ]
   },
   'playermeta': {
