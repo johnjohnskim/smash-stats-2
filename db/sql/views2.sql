@@ -64,6 +64,7 @@ CREATE VIEW playermeta AS
  SELECT x.id,
     x.name,
     x.total,
+    x.rating,
     x.wins,
     CASE
         WHEN x.total = 0 THEN NULL
@@ -71,6 +72,7 @@ CREATE VIEW playermeta AS
     END AS winpct
    FROM ( SELECT p.id,
             p.name,
+            p.rating,
             ( SELECT count(*) AS count
                    FROM findpfights(p.id) ) AS total,
             ( SELECT count(*) AS count

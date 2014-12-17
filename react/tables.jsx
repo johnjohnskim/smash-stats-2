@@ -150,6 +150,7 @@ var tableMeta = {
     'headers': [
       ['name', 'Name'],
       ['total', 'Total Fights'],
+      ['rating', 'Rating'],
       ['wins', 'Wins'],
       ['winpct', 'Win %']
     ]
