@@ -31,6 +31,25 @@ var App = React.createClass({
           stageData: stages
         });
       }.bind(this));
+
+    // app-wide scroll shortcuts
+    function scrollTo(className) {
+      $('html, body').animate({
+        scrollTop: $('.'+className).offset().top
+      }, 250);
+    }
+    var shortcuts = {
+      97: 'fight-header',
+      115: 'fight-summary',
+      100: 'fight-stages',
+      102: 'fight-notes',
+    };
+    $(window).keypress(function(e) {
+      var tag = e.target.tagName.toLowerCase();
+      if (tag != 'input') {
+        scrollTo(shortcuts[e.keyCode]);
+      }
+    });
   },
   getInitialState: function() {
     return {
@@ -503,7 +522,7 @@ var Summary = React.createClass({
     var stats = !this.props.player || !this.props.char ? null :
       <div className='summary-stats'>
         <div>Current Rating: <span style={boldStyle}>{this.props.player ? this.props.player.rating: ''}</span></div>
-        <div>Character Win %: {this.props.char ? convertPct(this.props.char.winpct) : 'n/a'}</div>
+        <div>Character Win %: {this.props.char && this.props.char.total != "0" ? convertPct(this.props.char.winpct) : 'n/a'}</div>
         <div>Player Chance to Win: {this.props.expectation ? convertPct(this.props.expectation) : ''}</div>
         <div style={boldStyle}>Total Chance to Win: {this.props.charExpectation ? convertPct(this.props.charExpectation) : ''}</div>
         <div style={boldStyle}>Rating at Stake: {this.props.rating ? this.props.rating.win : ''} | {this.props.rating ? this.props.rating.lose : ''}</div>
