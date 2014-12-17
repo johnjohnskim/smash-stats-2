@@ -7,7 +7,7 @@
 --    FROM stages s;
 
 CREATE VIEW stagemeta AS
- SELECT s.id, s.name, f.count total, CAST(f.ratingChange AS int) ratingChange
+ SELECT s.id, s.name, CAST(f.count AS int) total, CAST(f.ratingChange AS int) ratingChange
    FROM stages s
    LEFT JOIN (SELECT count(*) count, avg(abs(rating1)) ratingChange, stage
               FROM fights GROUP BY stage) f ON f.stage=s.id;
@@ -17,8 +17,8 @@ CREATE VIEW stagewins AS
     x.playername,
     x.stage,
     x.stagename,
-    x.total,
-    x.wins,
+    CAST(x.total as int) total,
+    CAST(x.wins as int) wins,
     CASE
         WHEN x.total = 0 THEN NULL
         ELSE cast(x.wins as float) / cast(x.total as float)
@@ -41,8 +41,8 @@ CREATE VIEW charstagewins AS
     x.charactername,
     x.stage,
     x.stagename,
-    x.total,
-    x.wins,
+    CAST(x.total as int) total,
+    CAST(x.wins as int) wins,
     CASE
         WHEN x.total = 0 THEN NULL
         ELSE cast(x.wins as float) / cast(x.total as float)
@@ -63,9 +63,9 @@ CREATE VIEW charstagewins AS
 CREATE VIEW playermeta AS
  SELECT x.id,
     x.name,
-    x.total,
+    CAST(x.total as int) total,
     x.rating,
-    x.wins,
+    CAST(x.wins as int) wins,
     CASE
         WHEN x.total = 0 THEN NULL
         ELSE cast(x.wins AS float) / cast(x.total AS float)
@@ -85,8 +85,8 @@ CREATE VIEW playervs AS
     x.player1name,
     x.player2,
     x.player2name,
-    x.total,
-    x.wins,
+    CAST(x.total as int) total,
+    CAST(x.wins as int) wins,
         CASE
             WHEN x.total = 0 THEN NULL
             ELSE cast(x.wins AS float) / cast(x.total AS float)
@@ -108,8 +108,8 @@ CREATE VIEW characterwins AS
      x.playername,
      x."character",
      x.charactername,
-     x.total,
-     x.wins,
+     CAST(x.total as int) total,
+     CAST(x.wins as int) wins,
         CASE
             WHEN  x.total = 0 THEN NULL
             ELSE  cast(x.wins AS float) /  cast(x.total AS float)
@@ -129,8 +129,8 @@ CREATE VIEW characterwins AS
 CREATE VIEW charactermeta AS
  SELECT x.id,
     x.name,
-    x.total,
-    x.wins,
+    CAST(x.total as int) total,
+    CAST(x.wins as int) wins,
         CASE
             WHEN x.total = 0 THEN NULL
             ELSE cast(x.wins AS float) / cast(x.total AS float)
@@ -149,8 +149,8 @@ CREATE VIEW charactervs AS
     x.character1name,
     x.character2,
     x.character2name,
-    x.total,
-    x.wins,
+    CAST(x.total as int) total,
+    CAST(x.wins as int) wins,
         CASE
             WHEN x.total = 0 THEN NULL
             ELSE cast(x.wins AS float) / cast(x.total AS float)
