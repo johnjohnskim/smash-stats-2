@@ -1,17 +1,23 @@
 .index {
   text-align: center;
-  margin-left: 20%;
-  padding: 4rem 0;
-  width: 60%;
 }
 
 .logo {
   margin: 2rem 0 4rem 0;
+  img {
+    @media (max-width: 550px) {
+      width: 350px;
+    }
+  }
 }
 
 .add-fight {
-  width: 30%;
-  margin-left: 35%;
+  width: 100%;
+  margin-left: 0;
+  @media (min-width: 750px) {
+    width: 30%;
+    margin-left: 35%;
+  }
   a {
     text-decoration: none;
   }
