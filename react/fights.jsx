@@ -351,7 +351,7 @@ var App = React.createClass({
         </div>
         <hr />
         <div className="fight-stages">
-          <StageSearch searchStage={this.searchStage} />
+          <StageSearch searchStage={this.searchStage} filter={this.state.stageFilter} />
           <Stages data={this.state.stageData} selected={this.state.stage} selectStage={this.selectStage} filter={this.state.stageFilter} />
         </div>
         <hr />
@@ -581,7 +581,7 @@ var StageSearch = React.createClass({
   }, 100),
   render: function() {
     return (
-      <input type="text" className="stage-search u-full-width" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
+      <input type="text" className="stage-search u-full-width" placeholder="Search..." ref="search" value={this.props.filter} onChange={this.handleKeypress} />
     );
   }
 });
