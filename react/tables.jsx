@@ -98,7 +98,7 @@ var Table = React.createClass({
     return (
       <div>
         <div>
-          <div className="u-pull-right">
+          <div className="table-search">
             <input type="text" placeholder="Search..." ref="search" onChange={this.handleKeypress} />
           </div>
         </div>

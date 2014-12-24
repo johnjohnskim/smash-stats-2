@@ -5,9 +5,18 @@
 .main-menu {
   list-style-type: none;
   li {
-    display: inline-block;
+    display: block;
+    margin: 1rem 1rem;
+    width: 25rem;
+    @media (min-width: 550px) {
+      display: inline-block;
+      margin: 0 1rem;
+      width: 15%;
+    }
+    @media (min-width: 700px) {
+      width: 20%;
+    }
     background-color: @light-gray;
-    margin: 0 1rem;
     padding: 1rem 2rem;
     &:hover {
       cursor: pointer;
