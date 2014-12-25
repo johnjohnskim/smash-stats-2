@@ -441,7 +441,7 @@ var Character = React.createClass({
     });
     var select = (this.props.data.select < 10 ? '0' : 0) + this.props.data.select;
     return (
-      <img src={'/img/chars/selects/select_'+select+'.png'} className={classes} onClick={this.handleClick}/>
+      <img src={'/img/selects/select_'+select+'.png'} className={classes} onClick={this.handleClick}/>
     );
   }
 });
