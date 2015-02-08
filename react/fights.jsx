@@ -64,15 +64,17 @@ var App = React.createClass({
       winner: 0,
       rating: [],
       notes: '',
-      // other
+      // stats predictions
       expectations: [],
       charExpectations: [],
-      playerQueue: [],
-      // basic: easiest to input, doubles: 2v2
-      // enterType: 'basic',
+      // queues for next fight
+      matchType: 'queue', // queue or robin: winner goes on or round-robin
+      playerQueue: [], // next fight is assumed to be winner vs next person in queue
+      robinPlayers: [],
+      fightQueue: [], // next fight is determined by round robin format
+      // other
       errorMsg: '',
       isFightAdded: false,
-      characterFilter: '',
       stageFilter: '',
       oldFights: []
     };
@@ -81,6 +83,7 @@ var App = React.createClass({
     pid = +pid;
     pos--;
     var newPlayers = this.state.players.slice();
+    // check for duplicate players
     if ((pos === 0 && newPlayers[1] != pid)  || (pos === 1 && newPlayers[0] != pid)) {
       newPlayers[pos] = pid;
     }
@@ -107,11 +110,18 @@ var App = React.createClass({
       });
     }
   },
+  changeMatchType: function(type) {
+    this.setState({
+      matchType: type
+    });
+    this.resetMatches();
+  },
   queuePlayer: function(pid) {
     if (this.state.playerQueue.indexOf(pid) == -1) {
       this.addPlayer(pid);
       this.setState({
-        playerQueue: this.state.playerQueue.concat([pid])
+        playerQueue: this.state.playerQueue.concat([pid]),
+        robinPlayers: this.state.robinPlayers.concat([pid])
       });
     }
   },
@@ -123,6 +133,8 @@ var App = React.createClass({
 
     var players = this.state.players.slice();
     var playerQueue = this.state.playerQueue.filter(notPlayer);
+    var robinPlayers = this.state.robinPlayers.filter(notPlayer);
+    // remove the player from the current matchup
     if (players.indexOf(pid) > -1) {
       players = players.filter(notPlayer);
       if (playerQueue.length > 1) {
@@ -131,8 +143,75 @@ var App = React.createClass({
     }
     this.setState({
       playerQueue: playerQueue,
+      robinPlayers: robinPlayers,
       players: players
     });
+  },
+  createMatches: function() {
+    function roundRobin(players) {
+      players = players.slice();
+      var n = players.length;
+      var r = [];
+
+      // make sure we have an even number of players
+      if (n % 2 == 1) {
+        players.push(undefined);
+        n++;
+      }
+
+      for (var i = 0; i < n - 1; i++) {
+        r[i] = [];
+        for (var j = 0; j < n / 2; j++) {
+          if (players[j] !== undefined && players[n - 1 - j] !== undefined) {
+            r[i].push([players[j], players[n - 1 - j]]);
+          }
+        }
+        players.splice(1, 0, players.pop());
+      }
+      return r;
+    }
+
+    var players = this.state.robinPlayers.slice();
+    var rounds = roundRobin(_.shuffle(players));
+    rounds = rounds.map(function(r, i) {
+      return {
+        matches: r,
+        round: i + 1
+      }
+    });
+    this.setState({
+      fightQueue: rounds
+    }, this.setMatch);
+  },
+  resetMatches: function() {
+    this.setState({
+      fightQueue: [],
+      robinPlayers: [],
+      playerQueue: [],
+      players: []
+    })
+  },
+  setMatch: function() {
+    var match = this.state.fightQueue[0].matches[0];
+    this.setState({
+      players: [match[0], match[1]]
+    });
+  },
+  removeMatch: function() {
+    var rounds =  _.cloneDeep(this.state.fightQueue);
+    var match = rounds[0].matches.shift();
+    // if there are no matches left, remove the round
+    if (!rounds[0].matches.length) {
+      rounds.shift();
+    }
+    // if there are no rounds left, create new ones
+    if (!rounds.length) {
+      this.createMatches();
+    } else {
+      this.setState({
+        fightQueue: rounds
+      }, this.setMatch);
+    }
   },
   addCharacter: function(cid) {
     if (this.state.characters.length < 2) {
@@ -192,20 +271,25 @@ var App = React.createClass({
 
     var p1rating = p1.rating;
     var p2rating = p2.rating;
-    // +rating = m * (100*(win/total) - 50)
-      // m is a modifier on how much character performance affects the final expectation
-    //   m = 2, 75% - 25%; m = 5, 95% - 5%
 
+    // based on basic elo rating system
+    // expected win %, not including character win %
     var expectations = [];
     expectations[0] = 1.0 / (1.0 + Math.pow(10.0, ((p2rating - p1rating)/400.0)));
     expectations[1] = 1.0 / (1.0 + Math.pow(10.0, ((p1rating - p2rating)/400.0)));
 
+    // m is a modifier on how much character performance affects the final expectation
+    // +rating = m * (100*(win/total) - 50)
+    // given 2 equal players, with one character having a 100% win rate, and the second
+    //  character having a 0% win rate, the expected win rate is:
+    // m = 2, 75% : 25%; m = 5, 95% : 5%
     var m = 5;
-    var c1pct = c1.total > 5 && c1.winpct ? c1.winpct : 0.50;
-    var c2pct = c2.total > 5 && c2.winpct ? c2.winpct : 0.50;
-    p1rating += m * ((100 * (c1pct || 0.50)) - 50);
-    p2rating += m * ((100 * (c2pct || 0.50)) - 50);
+    var c1pct = c1.total > 5 && c1.winpct !== undefined ? c1.winpct : 0.50;
+    var c2pct = c2.total > 5 && c2.winpct !== undefined ? c2.winpct : 0.50;
+    p1rating += m * ((100 * c1pct) - 50);
+    p2rating += m * ((100 * c2pct) - 50);
 
+    // expected win %, including character win %
     var charExpectations = [];
     charExpectations[0] = 1.0 / (1.0 + Math.pow(10.0, ((p2rating - p1rating)/400.0)));
     charExpectations[1] = 1.0 / (1.0 + Math.pow(10.0, ((p1rating - p2rating)/400.0)));
@@ -283,11 +367,18 @@ var App = React.createClass({
     fightData.winner = player1.id == fightData.winner ? player1.name : player2.name;
     // reset the state vars
     this.clearFight();
-    var playerQueue = [winner].concat(this.state.playerQueue.slice(2)).concat(loser);
+    var playerQueue;
+    if (this.state.matchType == 'queue') {
+      playerQueue = [winner].concat(this.state.playerQueue.slice(2)).concat(loser);
+      this.setState({
+        players: [winner, playerQueue[1]],
+        playerQueue: playerQueue,
+      });
+    } else {
+      this.removeMatch();
+    }
     this.setState({
       isFightAdded: true,
-      players: [winner, playerQueue[1]],
-      playerQueue: playerQueue,
       playerData: playerData,
       oldFights: [fightData].concat(this.state.oldFights)
     });
@@ -323,6 +414,9 @@ var App = React.createClass({
   },
   // BASE RENDER
   render: function() {
+    var queue = this.state.matchType == 'queue' ?
+      <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} /> :
+      <RoundRobin data={this.state.playerData} queue={this.state.fightQueue} players={this.state.robinPlayers} selectedPlayers={this.state.players} createMatches={this.createMatches} resetMatches={this.resetMatches} dequeuePlayer={this.dequeuePlayer} />;
     return (
       <div className="fight-app">
         <h1 className="fight-header">Add a Fight</h1>
@@ -334,8 +428,9 @@ var App = React.createClass({
           </div>
           <div className="fight-players three columns">
             <AddPlayer addPlayer={this.addNewPlayer} />
+            <MatchType changeMatchType={this.changeMatchType} matchType={this.state.matchType} />
             <Players data={this.state.playerData} queue={this.state.playerQueue} queuePlayer={this.queuePlayer} />
-            <PlayerQueue data={this.state.playerData} queue={this.state.playerQueue} selectedPlayers={this.state.players} dequeuePlayer={this.dequeuePlayer} />
+            {queue}
           </div>
         </div>
         <hr />
@@ -390,6 +485,26 @@ var Players = React.createClass({
   }
 });
 
+var MatchType = React.createClass({
+  handleSelect: function(event) {
+    this.props.changeMatchType(event.target.value);
+  },
+  render: function() {
+    return (
+      <div>
+        <span className="u-pull-left">
+          <input type="radio" name="matchType" value="queue" checked={this.props.matchType == 'queue'} onChange={this.handleSelect} />
+          &nbsp; Normal Queue
+        </span>
+        <span className="u-pull-right">
+          <input type="radio" name="matchType" value="robin" checked={this.props.matchType == 'robin'} onChange={this.handleSelect} />
+          &nbsp; Round Robin
+        </span>
+      </div>
+    );
+  }
+});
+
 var PlayerQueue = React.createClass({
   handleClick: function(event) {
     this.props.dequeuePlayer(event.target.getAttribute('value'));
@@ -423,6 +538,87 @@ var PlayerQueue = React.createClass({
   }
 });
 
+var RoundRobin = React.createClass({
+  removePlayer: function(event) {
+    this.props.dequeuePlayer(event.target.getAttribute('value'));
+  },
+  createMatches: function() {
+    this.props.createMatches();
+  },
+  resetMatches: function() {
+    this.props.resetMatches();
+  },
+  render: function() {
+    var players = this.props.players.map(function(p) {
+      return _.find(this.props.data, {id: p});
+    }.bind(this));
+    var rounds = this.props.queue.map(function(round) {
+      return {
+        round: round.round,
+        matches: round.matches.map(function(m) {
+          return m.map(function(pid) {
+            return _.find(this.props.data, {id: pid});
+          }.bind(this));
+        }.bind(this))
+      };
+    }.bind(this));
+
+
+    function makePlayer(p) {
+      return (
+        <li key={p.id}>
+          {p.name} <span className="remove-player" onClick={this.removePlayer} value={p.id}></span>
+        </li>
+      );
+    }
+    makePlayer = makePlayer.bind(this);
+
+    function makeRound(r) {
+      var matches = r.matches.map(function(x) {
+        var classes = this.props.selectedPlayers[0] == x[0].id && this.props.selectedPlayers[1] == x[1].id ? 'selected' : '';
+        return (
+          <li className={classes}>
+            {x[0].name} vs {x[1].name}
+          </li>
+        );
+      }.bind(this));
+      return (
+        <div className="robin-item">
+          <h3>Round {r.round}</h3>
+          <ul key={r.round}>
+            {matches}
+          </ul>
+        </div>
+      )
+    }
+    makeRound = makeRound.bind(this);
+
+    var items = this.props.queue.length ?
+      (<ul className='robin-round-list'>
+        {rounds.map(makeRound)}
+      </ul>) :
+      (<ul className='robin-player-list'>
+        {players.map(makePlayer)}
+      </ul>);
+
+    var action;
+    if (this.props.queue.length) {
+      action = <button className="resetMatches" onClick={this.resetMatches}>Reset</button>;
+    } else if (this.props.players.length > 1) {
+      action = <button className="createMatches" onClick={this.createMatches}>Create Matchess</button>;
+    } else {
+      action = <span><em>Select players...</em></span>;
+    }
+
+    return (
+      <div>
+        {items}
+        {action}
+      </div>
+    );
+  }
+})
+
 var Character = React.createClass({
   handleClick: function() {
     if (!this.props.summary) {
@@ -451,6 +647,7 @@ var Characters = React.createClass({
     if (!this.props.data.length) {
       return (<div />);
     }
+    // physical layout of all the characters, using their ids
     var charRows = [
       [23, 22, 35, 1, 49, 40, 2, 47, 7, 6, 30, 19],
       [18, 50, 42, 12, 45, 41, 51, 37, 34, 24, 14, 39, 9],

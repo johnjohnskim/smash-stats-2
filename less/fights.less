@@ -47,6 +47,35 @@ input.player-input {
   }
 }
 
+.robin-player-list {
+  li {
+    display: inline-block;
+    padding: 10px;
+  }
+}
+
+.robin-round-list {
+  margin-top: 2rem;
+  height: 30rem;
+  overflow-y: scroll;
+}
+
+.robin-item {
+  text-align: left;
+  h3 {
+    font-size: 2rem;
+  }
+  li {
+    list-style-type: none;
+    margin: 0.5rem auto;
+    &.selected {
+      color: darken(@blue, 20%);
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+  }
+}
+
 // characters
 .fight-chars {
   border-bottom: 1px solid @light-gray;
