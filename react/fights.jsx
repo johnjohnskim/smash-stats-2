@@ -294,6 +294,7 @@ var App = React.createClass({
     charExpectations[0] = 1.0 / (1.0 + Math.pow(10.0, ((p2rating - p1rating)/400.0)));
     charExpectations[1] = 1.0 / (1.0 + Math.pow(10.0, ((p1rating - p2rating)/400.0)));
 
+    // TODO: switch this to character expectations if both c.totalFights > 5
     var k = 24;
     var p1wins = [Math.round(k * (1.0 - expectations[0])), Math.round(k * (0.0 - expectations[1]))];
     var p2wins = [Math.round(k * (0.0 - expectations[0])), Math.round(k * (1.0 - expectations[1]))];
@@ -605,7 +606,7 @@ var RoundRobin = React.createClass({
     if (this.props.queue.length) {
       action = <button className="resetMatches" onClick={this.resetMatches}>Reset</button>;
     } else if (this.props.players.length > 1) {
-      action = <button className="createMatches" onClick={this.createMatches}>Create Matchess</button>;
+      action = <button className="createMatches" onClick={this.createMatches}>Create Matches</button>;
     } else {
       action = <span><em>Select players...</em></span>;
     }
