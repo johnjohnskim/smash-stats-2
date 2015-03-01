@@ -1,6 +1,6 @@
 {
   "name": "smash-stats-2",
-  "version": "2.0",
+  "version": "2.1",
   "homepage": "https://github.com/johnjohnskim/smash-stats-2",
   "authors": [
     "John Kim <johnjohnskim@gmail.com>"
@@ -15,11 +15,11 @@
     "tests"
   ],
   "dependencies": {
-    "d3": "~3.4.13",
+    "d3": "~3.5.5",
     "jquery": "~2.1.1",
-    "lodash": "~2.4.1",
+    "lodash": "~3.3.1",
     "queue-async": "git@github.com:mbostock/queue.git#~1.0.7",
     "react": "~0.12.1",
-    "skeleton": "*"
+    "skeleton": "~2.0.4"
   }
 }
