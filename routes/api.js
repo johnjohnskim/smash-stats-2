@@ -1,7 +1,50 @@
 var express = require('express');
+var http = require('http');
+var crypto = require('crypto');
 
 var router = express.Router();
 var sql = require('../db/sql');
+var secret = require('../db/auth').secret;
+
+function hashPayload(data, secret) {
+  var hmac = crypto.createHmac('sha256', secret);
+  return hmac.update(data).digest('base64');
+}
+
+function sendPayload(data) {
+  data = JSON.stringify(data);
+  var hashedPayload = hashPayload(data, secret);
+  var headers = {
+    'Content-Type': 'application/json',
+    'Content-Length': data.length,
+    'X-Smash-Delivery': hashedPayload
+  };
+  var options = {
+    host: 'localhost',
+    port: 3000,
+    path: '/api/test',
+    method: 'POST',
+    headers: headers
+  };
+  var req = http.request(options, function(res) {
+    res.setEncoding('utf-8');
+    var responseString = '';
+
+    res.on('data', function(data) {
+      responseString += data;
+    });
+    res.on('end', function() {
+      console.log(responseString);
+    });
+  });
+
+  req.on('error', function(e) {
+    console.log(e.message);
+  });
+
+  req.write(data);
+  req.end();
+}
 
 router.use(function(req, res, next) {
   console.log('api request made');
@@ -17,6 +60,25 @@ router.use(function(req, res, next) {
   API_RESPONSE = res;
   next();
 });
+
+// webhook test
+router.route('/test')
+  .get(function(req, res) {
+    console.log('sending...');
+    sendPayload({name: 'hello world'});
+    return res.end('start of test');
+  })
+  .post(function(req, res) {
+    console.log('got the payload: ');
+    console.log(req.body);
+    console.log('verifying payload...');
+    if (hashPayload(JSON.stringify(req.body), secret) == req.headers['x-smash-delivery']) {
+      console.log('payload verified');
+    } else {
+      console.log('this aint real');
+    }
+    return res.end('end of test');
+  });
 
 // PLAYERS
 router.route('/players')
