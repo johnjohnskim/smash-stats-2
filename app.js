@@ -75,3 +75,16 @@ app.set('port', process.env.PORT || 3000);
 var server = app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + server.address().port);
 });
+
+// websockets
+var io = require('socket.io')(server);
+io.on('connection', function(socket) {
+  socket.emit('connected', {msg: "You're connected!" });
+  ['queue player', 'dequeue player', 'select stage', 'change match type', 'add char',
+   'remove char', 'select winner', 'add notes'].forEach(function(e) {
+      socket.on(e, function(data) {
+        // console.log('emitting ' + e);
+        socket.broadcast.emit(e, data);
+      });
+   })
+});

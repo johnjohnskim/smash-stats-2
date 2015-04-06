@@ -52,6 +52,28 @@ var App = React.createClass({
     });
   },
   getInitialState: function() {
+    var socket = io.connect('localhost:3000');
+    socket.on('connected', function(data) {
+      console.log(data.msg);
+    });
+    var events = [
+      {event: 'queue player', fn: 'queuePlayer', attr: 'player'},
+      {event: 'dequeue player', fn: 'dequeuePlayer', attr: 'player'},
+      {event: 'select stage', fn: 'selectStage', attr: 'stage'},
+      {event: 'change match type', fn: 'changeMatchType', attr:  'type'},
+      {event: 'add char', fn: 'addCharacter', attr: 'char'},
+      {event: 'remove char', fn: 'removeCharacter', attr: null},
+      {event: 'select winner', fn: 'selectWinner', attr: 'winner'},
+      {event: 'add notes', fn: 'addNotes', attr: 'notes'}
+    ];
+    events.forEach(function(e) {
+      socket.on(e.event, function(data) {
+        if (!data) { data = {}; }
+        this.setState({fromEmit: true}, function() {
+          this[e.fn](data[e.attr]);
+        });
+      }.bind(this));
+    }.bind(this));
     return {
       // meta data from api
       playerData: [],
@@ -76,8 +98,16 @@ var App = React.createClass({
       errorMsg: '',
       isFightAdded: false,
       stageFilter: '',
-      oldFights: []
+      oldFights: [],
+      socket: socket,
+      fromEmit: false
     };
+  },
+  emitEvent: function(e, data) {
+    if (!this.state.fromEmit) {
+      this.state.socket.emit(e, data);
+    }
+    this.setState({fromEmit: false});
   },
   selectPlayer: function(pid, pos) {
     pid = +pid;
@@ -115,6 +145,7 @@ var App = React.createClass({
       matchType: type
     });
     this.resetMatches();
+    this.emitEvent('change match type', {type: type});
   },
   queuePlayer: function(pid) {
     if (this.state.playerQueue.indexOf(pid) == -1) {
@@ -124,6 +155,7 @@ var App = React.createClass({
         robinPlayers: this.state.robinPlayers.concat([pid])
       });
     }
+    this.emitEvent('queue player', {player: pid});
   },
   dequeuePlayer: function(pid) {
     pid = +pid;
@@ -146,6 +178,7 @@ var App = React.createClass({
       robinPlayers: robinPlayers,
       players: players
     });
+    this.emitEvent('dequeue player', {player: pid});
   },
   createMatches: function() {
     function roundRobin(players) {
@@ -219,6 +252,7 @@ var App = React.createClass({
         characters: this.state.characters.concat([cid])
       }, this.calculateRating);
     }
+    this.emitEvent('add char', {char: cid});
   },
   removeCharacter: function() {
     if (this.state.characters.length) {
@@ -226,11 +260,13 @@ var App = React.createClass({
         characters: this.state.characters.slice(0, this.state.characters.length - 1)
       });
     }
+    this.emitEvent('remove char');
   },
   selectStage: function(sid) {
     this.setState({
       stage: sid
     });
+    this.emitEvent('select stage', {stage: sid});
   },
   searchStage: function(text) {
     this.setState({
@@ -241,11 +277,13 @@ var App = React.createClass({
     this.setState({
       winner: wid
     });
+    this.emitEvent('select winner', {winner: wid});
   },
   addNotes: function(notes) {
     this.setState({
       notes: notes
     });
+    this.emitEvent('add notes', {notes: notes});
   },
   addNotesTag: function(tag, isChecked) {
     var notes = this.state.notes;
@@ -259,6 +297,7 @@ var App = React.createClass({
     this.setState({
       notes: notes
     });
+    this.emitEvent('add notes', {notes: notes});
   },
   calculateRating: function() {
     if (this.state.players.length < 2 || this.state.characters.length < 2) {
